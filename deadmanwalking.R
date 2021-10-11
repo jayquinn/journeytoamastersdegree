@@ -1,18 +1,44 @@
-##
-#독립변수 후보 1. 모형 missfit
-#독립변수 후보 2. 범주 수 * 
-#독립변수 후보 3. 표본크기 *
-#독립변수 후보 4. 난이도 *
-#독립변수 후보 5. 변별도 *
-#독립변수 후보 6. 문항 길이 *
-#독립변수 후보 7. 신뢰도 *
+setwd("c:\\git\\journeytoamastersdegree")
 
-#종속변수 후보 - 추정: 
-#종속변수 후보 - 분류: 1종 오류율 
+source("conditions.r")
 
-#지금 막힌 문제: 종속 변수륾 못 고르겠다. 1종 오류율? 일단 백분위로 잡고 시작하든지..
-# 뭐라도 시작을 해야해 얼른
+#문항 범주 수 2
+# 난이도 0
+# 변별도 0.5~1.5
+# 문항 수 15
+# 표본크기 250
+
+person = rnorm(250, mean = 0, sd = 1)
+a = runif(15, min = 0, max = 1.5)
+d = rnorm(15, mean = 0, sd = 1)
+N = 250
+response = simdata(a = a, d = d, N = N, itemtype = '2PL')
+#CTT
+sumscore = apply(response,1,sum)
+hist(sumscore)
+#CFA
+model.cfa = 'F1 =~ Item_1 + Item_2 + Item_3+ Item_4+ Item_5+ Item_6+ Item_7+ Item_8+ Item_9+ Item_10 +
+                   Item_11+ Item_12+ Item_13+ Item_14+ Item_15'
+results.cfa<-cfa(model=model.cfa,data = response)
+summary(results.cfa)
+score.CFA<-lavPredict(results.cfa, method = "regression", se = T, acov = T)
+hist(score.CFA)
+#RASCH
+model.rasch <- 'F1 = 1-15' 
+results.rasch <- mirt(data=response, model=model.2pl, itemtype="Rasch", SE=TRUE, verbose=T)
+summary(results.rasch)
+coef.rasch <- coef(results.rasch, IRTpars=TRUE, simplify=TRUE)
+print(coef.rasch)
+score.rasch<-fscores(results.rasch,method = 'EAP')
+hist(score.rasch)# EAP(default) MAP ML WLE EAPsum
+#2PL
+model.2pl <- 'F1 = 1-15' 
+results.2pl <- mirt(data=response, model=model.2pl, itemtype="2PL", SE=TRUE, verbose=T)
+summary(results.2pl)
+coef.2pl <- coef(results.2pl, IRTpars=TRUE, simplify=TRUE)
+print(coef.2pl)
+score.2pl<-fscores(results.2pl,method = 'EAP')
+hist(score.2pl)# EAP(default) MAP ML WLE EAPsum
 
 
-####제일 먼저 해볼 일 땡점수로 1종오류율 체크하기
 
