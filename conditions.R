@@ -1,12 +1,17 @@
-setwd("C:/git/journeytoamastersdegree")
-source("names.r")
-get.IV.names()
 
-opt1 = c(2,3,4,5) #n.cat
-opt2 = c(200, 500, 1000, 1500, 2000) #s.size
-opt3 = c("시이발") #i.diff
-opt4 = c("시이팔") #i.disc 
-opt5 = c(5, 10, 15, 20) #n.item
-opt6 = c("시이벌") #reli
-opts = expand.grid(opt1,opt2,opt3,opt4,opt5,opt6)
-write.table(opts,"conditions.csv",row.names=F,sep=",")
+
+#범주 수 2, 5, 혼합(2,3,5)
+
+nsize = c(250, 500, 750)
+nitem = c(10, 20, 30)
+diffmn = c(0, 0.75, 1.5)
+diffsd = c(0.5, 1)
+discmi = c(1, 0.8, 0.5)
+discma = c(1, 1.2, 1.5)
+
+cond = expand.grid(nsize,nitem,diffmn,diffsd,discmi,discma)
+colnames(cond) = c("nsize","nitem","diffmn","diffsd","discmi","discma")
+
+
+write.table(cond,"conditions.csv",row.names=F,sep=",")
+select(starts_with())
