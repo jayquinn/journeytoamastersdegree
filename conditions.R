@@ -14,4 +14,3 @@ colnames(cond) = c("nsize","nitem","diffmn","diffsd","discmi","discma")
 
 
 write.table(cond,"conditions.csv",row.names=F,sep=",")
-select(starts_with())
