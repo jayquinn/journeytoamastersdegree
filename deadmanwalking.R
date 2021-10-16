@@ -37,12 +37,18 @@ for(k in condloop){
     paddle$mark2[which(paddle$pers<=personcrit[2])] <- 1
     paddle$mark3[which(paddle$pers<=personcrit[3])] <- 1
     #hist(paddle$pers)
-    
-    
+
     a = runif(cond$nitem[k], min = cond$discmi[k] , max = cond$discma[k] )
-    d = rnorm(cond$nitem[k], mean = cond$diffmn[k], sd = cond$diffsd[k])
+    b = matrix(data = rnorm(cond$nitem[k],mean = cond$diffmn[k], sd = cond$diffsd[k]), nrow = cond$nitem[k])
+    d = cbind(a,b)
+    si <- t(apply(d, 1,
+                  function(x) traditional2mirt(x = c(a=x,g=0,u=1), '2PL', ncat=2)))
     N = paddle$pers
-    response = simdata(a = a, d = d, N = N,Theta = as.matrix(paddle$pers), itemtype = '2PL')
+    response = simdata(a = si[,1], d = si[,2], N = length(N),Theta = as.matrix(paddle$pers), itemtype = '2PL')
+    
+    
+    
+    
     
     
     
@@ -332,4 +338,4 @@ colnames(boat) = c("CTTphi1","CTTphi2","CTTphi3","CFAphi1","CFAphi2","CFAphi3","
                    "CTTkappa1","CTTkappa2","CTTkappa3","CFAkappa1","CFAkappa2","CFAkappa3","PCMkappa1","PCMkappa2","PCMkappa3","GPCMkappa1","GPCMkappa2","GPCMkappa3",
                    "CTTtypeone1","CTTtypeone2","CTTtypeone3","CFAtypeone1","CFAtypeone2","CFAtypeone3","PCMtypeone1","PCMtypeone2","PCMtypeone3","GPCMtypeone1","GPCMtypeone2","GPCMtypeone3",
                    "CTTtypetwo1","CTTtypetwo2","CTTtypetwo3","CFAtypetwo1","CFAtypetwo2","CFAtypetwo3","PCMtypetwo1","PCMtypetwo2","PCMtypetwo3","GPCMtypetwo1","GPCMtypetwo2","GPCMtypetwo3")
-write.table(boat,"boat.csv",row.names=F,sep=",")
+write.table(boat,"boat2.csv",row.names=F,sep=",")

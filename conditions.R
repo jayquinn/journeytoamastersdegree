@@ -6,6 +6,7 @@ nsize = c(250, 500, 750)
 nitem = c(10, 20, 30)
 diffmn = c(0, 0.75, 1.5)
 diffsd = c(0.5, 1)
+
 discmi = c(1, 0.8, 0.5)
 discma = c(1, 1.2, 1.5)
 
