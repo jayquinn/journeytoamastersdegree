@@ -66,3 +66,5 @@ type2gmark3 = vector()
 
 
 boat = data.frame()
+boat2 = data.frame()
+boat5 = data.frame()
