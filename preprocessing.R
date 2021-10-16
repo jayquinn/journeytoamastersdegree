@@ -35,4 +35,34 @@ tmpkapgmark1 = vector()
 tmpkapgmark2 = vector()
 tmpkapgmark3 = vector()
 
+type1tmark1 = vector()
+type1tmark2 = vector()
+type1tmark3 = vector()
+type1fmark1 = vector()
+type1fmark2 = vector()
+type1fmark3 = vector()
+type1pmark1 = vector()
+type1pmark2 = vector()
+type1pmark3 = vector()
+type1gmark1 = vector()
+type1gmark2 = vector()
+type1gmark3 = vector()
+
+
+
+type2tmark1 = vector()
+type2tmark2 = vector()
+type2tmark3 = vector()
+type2fmark1 = vector()
+type2fmark2 = vector()
+type2fmark3 = vector()
+type2pmark1 = vector()
+type2pmark2 = vector()
+type2pmark3 = vector()
+type2gmark1 = vector()
+type2gmark2 = vector()
+type2gmark3 = vector()
+
+
+
 boat = data.frame()
