@@ -1,6 +1,6 @@
 
 setwd("c:\\git\\journeytoamastersdegree")
-cellloop = 1:1
+cellloop = 1:30
 condloop = 1:nrow(cond)
 for(k in condloop){
   for(i in cellloop){
@@ -301,7 +301,7 @@ for(k in condloop){
     tmpkapgmark2 = append(tmpkapgmark2, values = tmpkapg2$kappa)
     cohen.kappa(select(paddle,mark3,gmark3)) -> tmpkapg3
     tmpkapgmark3 = append(tmpkapgmark3, values = tmpkapg3$kappa)
-    
+    cat(k,"번째 조건",i,"번째 반복중")
   }
   agg = cbind(tmphitmark1,tmphitmark2,tmphitmark3,tmphifmark1,tmphifmark2,tmphifmark3,tmphipmark1,tmphipmark2,tmphipmark3,tmphigmark1,tmphigmark2,tmphigmark3,
               tmpkaptmark1,tmpkaptmark2,tmpkaptmark3,tmpkapfmark1,tmpkapfmark2,tmpkapfmark3,tmpkappmark1,tmpkappmark2,tmpkappmark3,tmpkapgmark1,tmpkapgmark2,tmpkapgmark3,
