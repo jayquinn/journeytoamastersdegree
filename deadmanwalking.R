@@ -21,7 +21,7 @@ setwd("c:\\git\\journeytoamastersdegree")
 
 setwd("c:\\git\\journeytoamastersdegree")
 cellloop = 1:30
-condloop = 212:nrow(cond)
+condloop = 370:nrow(cond)
 for(k in condloop){
   for(i in cellloop){
     
@@ -97,11 +97,13 @@ for(k in condloop){
     }  else {
       model.rasch <- 'F1 = 1-30' 
     }
-    results.rasch <- mirt(data=response, model=model.rasch, itemtype="Rasch", SE=TRUE, verbose=T)
+    results.rasch <- try(mirt(data=response, model=model.rasch, itemtype="Rasch", SE=TRUE, verbose=T),silent = T)
     #summary(results.rasch)
-    coef.rasch <- coef(results.rasch, IRTpars=TRUE, simplify=TRUE)
+    coef.rasch <- try(coef(results.rasch, IRTpars=TRUE, simplify=TRUE),silent = T)
     #print(coef.rasch)
-    fscores(results.rasch,method = 'EAP') %>% as.vector() -> paddle$PCM
+    tryCatch(expr = fscores(results.rasch,method = 'EAP'),
+             error = function(e) rep(0,times = cond$nsize[k]),
+             warning = function(e) cat(k ,"조건", i,"번째 반복에서 PCM warning")) %>% as.vector() -> paddle$PCM
     
     
     #hist(paddle$PCM)# EAP(default) MAP ML WLE EAPsum
@@ -119,12 +121,13 @@ for(k in condloop){
     }  else {
       model.2pl <- 'F1 = 1-30' 
     }
-    results.2pl <- mirt(data=response, model=model.2pl, itemtype="2PL", SE=TRUE, verbose=T)
+    results.2pl <- try(mirt(data=response, model=model.2pl, itemtype="2PL", SE=TRUE, verbose=T),silent = T)
     #summary(results.2pl)
-    coef.2pl <- coef(results.2pl, IRTpars=TRUE, simplify=TRUE)
+    coef.2pl <- try(coef(results.2pl, IRTpars=TRUE, simplify=TRUE),silent = T)
     #print(coef.2pl)
-    fscores(results.2pl,method = 'EAP') %>% as.vector() -> paddle$GPCM
-    
+    tryCatch(expr = fscores(results.2pl,method = 'EAP'),
+             error = function(e) rep(0,times = cond$nsize[k]),
+             warning = function(e) cat(k ,"조건", i,"번째 반복에서 GPCM warning")) %>% as.vector() -> paddle$GPCM
     #hist(paddle$GPCM)# EAP(default) MAP ML WLE EAPsum
     paddle$GPCM %>% quantile(c(0.05,0.10,0.15)) -> GPCMcrit
     paddle$gmark1[which(paddle$GPCM<=GPCMcrit[1])] <- 1
