@@ -21,7 +21,7 @@ setwd("c:\\git\\journeytoamastersdegree")
 
 setwd("c:\\git\\journeytoamastersdegree")
 cellloop = 1:30
-condloop = 370:nrow(cond)
+condloop = 211:211 #nrow(cond)
 for(k in condloop){
   for(i in cellloop){
     
