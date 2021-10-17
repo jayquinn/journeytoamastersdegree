@@ -20,8 +20,8 @@ setwd("c:\\git\\journeytoamastersdegree")
 
 
 setwd("c:\\git\\journeytoamastersdegree")
-cellloop = 1:1
-condloop = 1:nrow(cond)
+cellloop = 1:30
+condloop = 212:nrow(cond)
 for(k in condloop){
   for(i in cellloop){
     
@@ -77,9 +77,11 @@ for(k in condloop){
                    Item_21 + Item_22 + Item_23 + Item_24 + Item_25 +
                    Item_26 + Item_27 + Item_28 + Item_29 + Item_30'
     }
-    results.cfa<-cfa(model=model.cfa,data = response)
+    results.cfa<-try(cfa(model=model.cfa,data = response),silent = T)
     #summary(results.cfa)
-    lavPredict(results.cfa, method = "regression", se = T) %>% as.vector() -> paddle$CFA
+    tryCatch(expr = lavPredict(results.cfa, method = "regression", se = T),
+             error = function(e) rep(0,times = cond$nsize[k]),
+             warning = function(e) cat(k ,"조건", i,"번째 반복에서 CFA warning")) %>% as.vector() -> paddle$CFA
     #hist(paddle$CFA)
     
     paddle$CFA %>% quantile(c(0.05,0.10,0.15)) -> CFAcrit
@@ -324,12 +326,13 @@ for(k in condloop){
     tmpkapgmark2 = append(tmpkapgmark2, values = tmpkapg2$kappa)
     cohen.kappa(select(paddle,mark3,gmark3)) -> tmpkapg3
     tmpkapgmark3 = append(tmpkapgmark3, values = tmpkapg3$kappa)
-    
+    cat(k,"번째 조건",i,"번째 셀 반복중")
   }
   agg = cbind(tmphitmark1,tmphitmark2,tmphitmark3,tmphifmark1,tmphifmark2,tmphifmark3,tmphipmark1,tmphipmark2,tmphipmark3,tmphigmark1,tmphigmark2,tmphigmark3,
               tmpkaptmark1,tmpkaptmark2,tmpkaptmark3,tmpkapfmark1,tmpkapfmark2,tmpkapfmark3,tmpkappmark1,tmpkappmark2,tmpkappmark3,tmpkapgmark1,tmpkapgmark2,tmpkapgmark3,
               type1tmark1,type1tmark2,type1tmark3,type1fmark1,type1fmark2,type1fmark3,type1pmark1,type1pmark2,type1pmark3,type1gmark1,type1gmark2,type1gmark3,
               type2tmark1,type2tmark2,type2tmark3,type2fmark1,type2fmark2,type2fmark3,type2pmark1,type2pmark2,type2pmark3,type2gmark1,type2gmark2,type2gmark3)
+  agg[which(agg==0)]<-NA
   apply(agg,2, mean) %>% t() %>% as.data.frame %>% rbind(boat) -> boat
   cat(k,"번째 조건반복중")
 }
@@ -339,3 +342,4 @@ colnames(boat) = c("CTTphi1","CTTphi2","CTTphi3","CFAphi1","CFAphi2","CFAphi3","
                    "CTTtypeone1","CTTtypeone2","CTTtypeone3","CFAtypeone1","CFAtypeone2","CFAtypeone3","PCMtypeone1","PCMtypeone2","PCMtypeone3","GPCMtypeone1","GPCMtypeone2","GPCMtypeone3",
                    "CTTtypetwo1","CTTtypetwo2","CTTtypetwo3","CFAtypetwo1","CFAtypetwo2","CFAtypetwo3","PCMtypetwo1","PCMtypetwo2","PCMtypetwo3","GPCMtypetwo1","GPCMtypetwo2","GPCMtypetwo3")
 write.table(boat,"boat2.csv",row.names=F,sep=",")
+geterrmessage()
