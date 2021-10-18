@@ -293,10 +293,13 @@ score.frame.t<-as_tibble(score.frame)
 scoreframe<-cbind(score.frame.t,clean.diag)
 colnames(scoreframe)  <- c('CTT','CFA','PCM','GPCM','age','edu','gender','diag') ###########사실상 데이터 완성본 #####
 
-cri<-quantile(scoreframe$CTT,.7)
-print(cri)
-nrow(scoreframe[scoreframe$CTT<=cri,])
 
+##### 23점 이하 사람에게 마커 붙이기
+score.frame.t %>% mutate(marker = case_when(CTT > 17 & CTT <= 23 ~ '1',
+                                            CTT > 23 ~ '0',
+                                            CTT <= 17 ~ '2')) -> sf
+# 이거 012 기준으로 qunatile 짜서 각 quantile 안에 누가 몇명 속해있는지 알아보고
+# 
 ##상관그림
 plot(score.frame.t)
 # sort 상관 그림
