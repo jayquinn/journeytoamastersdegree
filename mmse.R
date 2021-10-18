@@ -1,7 +1,3 @@
-install.packages("dplyr")
-install.packages("mirt")
-install.packages("lavaan")
-install.packages("Epi")
 library(dplyr)
 library(mirt)
 library(lavaan)
@@ -289,6 +285,14 @@ score.frame<-cbind(score.CTT,score.CFA,score.PCM,score.GPCM)
 colnames(score.frame)<-c("CTT","CFA","PCM","GPCM")
 head(score.frame)
 score.frame.t<-as_tibble(score.frame)
+
+# 점수 히스토그램
+par(mfrow = (c(2,2)))
+hist(score.CTT)
+hist(score.CFA)
+hist(score.PCM)
+hist(score.GPCM)
+par(mfrow = (c(1,1)))
 #스코어 프레임
 scoreframe<-cbind(score.frame.t,clean.diag)
 colnames(scoreframe)  <- c('CTT','CFA','PCM','GPCM','age','edu','gender','diag') ###########사실상 데이터 완성본 #####
