@@ -54,9 +54,11 @@ for(k in condloop){
                    Item_21 + Item_22 + Item_23 + Item_24 + Item_25 +
                    Item_26 + Item_27 + Item_28 + Item_29 + Item_30'
     }
-    results.cfa<-cfa(model=model.cfa,data = response)
+    results.cfa<-try(cfa(model=model.cfa,data = response),silent = T)
     #summary(results.cfa)
-    lavPredict(results.cfa, method = "regression", se = T) %>% as.vector() -> paddle$CFA
+    tryCatch(expr = lavPredict(results.cfa, method = "regression", se = T),
+             error = function(e) rep(0,times = cond$nsize[k]),
+             warning = function(e) cat(k ,"조건", i,"번째 반복에서 CFA warning")) %>% as.vector() -> paddle$CFA
     #hist(paddle$CFA)
     
     paddle$CFA %>% quantile(c(0.05,0.10,0.15)) -> CFAcrit
@@ -72,11 +74,13 @@ for(k in condloop){
     }  else {
       model.rasch <- 'F1 = 1-30' 
     }
-    results.rasch <- mirt(data=response, model=model.rasch, itemtype="Rasch", SE=TRUE, verbose=T)
+    results.rasch <- try(mirt(data=response, model=model.rasch, itemtype="Rasch", SE=TRUE, verbose=T),silent = T)
     #summary(results.rasch)
-    coef.rasch <- coef(results.rasch, IRTpars=TRUE, simplify=TRUE)
+    coef.rasch <- try(coef(results.rasch, IRTpars=TRUE, simplify=TRUE),silent = T)
     #print(coef.rasch)
-    fscores(results.rasch,method = 'EAP') %>% as.vector() -> paddle$PCM
+    tryCatch(expr = fscores(results.rasch,method = 'EAP'),
+             error = function(e) rep(0,times = cond$nsize[k]),
+             warning = function(e) cat(k ,"조건", i,"번째 반복에서 PCM warning")) %>% as.vector() -> paddle$PCM
     
     
     #hist(paddle$PCM)# EAP(default) MAP ML WLE EAPsum
@@ -94,11 +98,14 @@ for(k in condloop){
     }  else {
       model.2pl <- 'F1 = 1-30' 
     }
-    results.2pl <- mirt(data=response, model=model.2pl, itemtype="gpcm", SE=TRUE, verbose=T)
+    results.2pl <- try(mirt(data=response, model=model.2pl, itemtype="gpcm", SE=TRUE, verbose=T),silent = T)
     #summary(results.2pl)
-    coef.2pl <- coef(results.2pl, IRTpars=TRUE, simplify=TRUE)
+    coef.2pl <- try(coef(results.2pl, IRTpars=TRUE, simplify=TRUE),silent = T)
     #print(coef.2pl)
-    fscores(results.2pl,method = 'EAP') %>% as.vector() -> paddle$GPCM
+    tryCatch(expr = fscores(results.2pl,method = 'EAP'),
+             error = function(e) rep(0,times = cond$nsize[k]),
+             warning = function(e) cat(k ,"조건", i,"번째 반복에서 GPCM warning")) %>% as.vector() -> paddle$GPCM
+    
     
     #hist(paddle$GPCM)# EAP(default) MAP ML WLE EAPsum
     paddle$GPCM %>% quantile(c(0.05,0.10,0.15)) -> GPCMcrit
@@ -315,4 +322,4 @@ colnames(boat) = c("CTTphi1","CTTphi2","CTTphi3","CFAphi1","CFAphi2","CFAphi3","
                    "CTTkappa1","CTTkappa2","CTTkappa3","CFAkappa1","CFAkappa2","CFAkappa3","PCMkappa1","PCMkappa2","PCMkappa3","GPCMkappa1","GPCMkappa2","GPCMkappa3",
                    "CTTtypeone1","CTTtypeone2","CTTtypeone3","CFAtypeone1","CFAtypeone2","CFAtypeone3","PCMtypeone1","PCMtypeone2","PCMtypeone3","GPCMtypeone1","GPCMtypeone2","GPCMtypeone3",
                    "CTTtypetwo1","CTTtypetwo2","CTTtypetwo3","CFAtypetwo1","CFAtypetwo2","CFAtypetwo3","PCMtypetwo1","PCMtypetwo2","PCMtypetwo3","GPCMtypetwo1","GPCMtypetwo2","GPCMtypetwo3")
-write.table(boat,"boat5.csv",row.names=F,sep=",")
+write.table(boat,"boat5-211019.csv",row.names=F,sep=",")
