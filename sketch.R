@@ -1,6 +1,6 @@
 
 setwd("c:\\git\\journeytoamastersdegree")
-cellloop = 1:30
+cellloop = 1:10
 condloop = 1:nrow(cond)
 for(k in condloop){
   for(i in cellloop){

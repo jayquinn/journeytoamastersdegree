@@ -293,13 +293,62 @@ score.frame.t<-as_tibble(score.frame)
 scoreframe<-cbind(score.frame.t,clean.diag)
 colnames(scoreframe)  <- c('CTT','CFA','PCM','GPCM','age','edu','gender','diag') ###########사실상 데이터 완성본 #####
 
-
+quantile(sf$PCM,0.25)
 ##### 23점 이하 사람에게 마커 붙이기
-score.frame.t %>% mutate(marker = case_when(CTT > 17 & CTT <= 23 ~ '1',
-                                            CTT > 23 ~ '0',
-                                            CTT <= 17 ~ '2')) -> sf
+score.frame.t %>% mutate(markerCTT = case_when(CTT <= 23 ~ '1',
+                                            CTT > 23 ~ '0'),
+                         markerCFA = case_when(CFA <= quantile(sf$CFA,0.25) ~ '1',
+                                               CFA > quantile(sf$CFA,0.25) ~ '0'),
+                         markerPCM = case_when(PCM <= quantile(sf$PCM,0.25) ~ '1',
+                                               PCM > quantile(sf$PCM,0.25) ~ '0'),
+                         markerGPCM = case_when(GPCM <= quantile(sf$GPCM,0.25) ~ '1',
+                                               GPCM > quantile(sf$GPCM,0.25) ~ '0')
+                         ) -> sf
+
+
 # 이거 012 기준으로 qunatile 짜서 각 quantile 안에 누가 몇명 속해있는지 알아보고
-# 
+sf %>% filter(markerCTT == 1 & markerCFA == 1) %>% nrow() -> TP
+sf %>% filter(markerCTT == 0 & markerCFA == 1) %>% nrow() -> FP
+sf %>% filter(markerCTT == 1 & markerCFA == 0) %>% nrow() -> FN
+sf %>% filter(markerCTT == 0 & markerCFA == 0) %>% nrow() -> TN
+cfs = matrix(c(TP,FP,FN,TN),ncol=2, dimnames=list(c("Actual Positive","Actual Negative"),c("Predicted Positive","Predicted Negative")))
+phi(cfs)
+Kappa(cfs)
+sf %>% filter(markerCTT == 1 & markerPCM == 1) %>% nrow() -> TP
+sf %>% filter(markerCTT == 0 & markerPCM == 1) %>% nrow() -> FP
+sf %>% filter(markerCTT == 1 & markerPCM == 0) %>% nrow() -> FN
+sf %>% filter(markerCTT == 0 & markerPCM == 0) %>% nrow() -> TN
+cfs = matrix(c(TP,FP,FN,TN),ncol=2, dimnames=list(c("Actual Positive","Actual Negative"),c("Predicted Positive","Predicted Negative")))
+phi(cfs)
+Kappa(cfs)
+sf %>% filter(markerCTT == 1 & markerGPCM == 1) %>% nrow() -> TP
+sf %>% filter(markerCTT == 0 & markerGPCM == 1) %>% nrow() -> FP
+sf %>% filter(markerCTT == 1 & markerGPCM == 0) %>% nrow() -> FN
+sf %>% filter(markerCTT == 0 & markerGPCM == 0) %>% nrow() -> TN
+cfs = matrix(c(TP,FP,FN,TN),ncol=2, dimnames=list(c("Actual Positive","Actual Negative"),c("Predicted Positive","Predicted Negative")))
+phi(cfs)
+Kappa(cfs)
+sf %>% filter(markerCFA == 1 & markerPCM == 1) %>% nrow() -> TP
+sf %>% filter(markerCFA == 0 & markerPCM == 1) %>% nrow() -> FP
+sf %>% filter(markerCFA == 1 & markerPCM == 0) %>% nrow() -> FN
+sf %>% filter(markerCFA == 0 & markerPCM == 0) %>% nrow() -> TN
+cfs = matrix(c(TP,FP,FN,TN),ncol=2, dimnames=list(c("Actual Positive","Actual Negative"),c("Predicted Positive","Predicted Negative")))
+phi(cfs)
+Kappa(cfs)
+sf %>% filter(markerCFA == 1 & markerGPCM == 1) %>% nrow() -> TP
+sf %>% filter(markerCFA == 0 & markerGPCM == 1) %>% nrow() -> FP
+sf %>% filter(markerCFA == 1 & markerGPCM == 0) %>% nrow() -> FN
+sf %>% filter(markerCFA == 0 & markerGPCM == 0) %>% nrow() -> TN
+cfs = matrix(c(TP,FP,FN,TN),ncol=2, dimnames=list(c("Actual Positive","Actual Negative"),c("Predicted Positive","Predicted Negative")))
+phi(cfs)
+Kappa(cfs)
+sf %>% filter(markerPCM == 1 & markerGPCM == 1) %>% nrow() -> TP
+sf %>% filter(markerPCM == 0 & markerGPCM == 1) %>% nrow() -> FP
+sf %>% filter(markerPCM == 1 & markerGPCM == 0) %>% nrow() -> FN
+sf %>% filter(markerPCM == 0 & markerGPCM == 0) %>% nrow() -> TN
+cfs = matrix(c(TP,FP,FN,TN),ncol=2, dimnames=list(c("Actual Positive","Actual Negative"),c("Predicted Positive","Predicted Negative")))
+phi(cfs)
+Kappa(cfs)
 ##상관그림
 plot(score.frame.t)
 # sort 상관 그림
