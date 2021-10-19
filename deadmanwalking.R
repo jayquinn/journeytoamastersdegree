@@ -344,5 +344,5 @@ colnames(boat) = c("CTTphi1","CTTphi2","CTTphi3","CFAphi1","CFAphi2","CFAphi3","
                    "CTTkappa1","CTTkappa2","CTTkappa3","CFAkappa1","CFAkappa2","CFAkappa3","PCMkappa1","PCMkappa2","PCMkappa3","GPCMkappa1","GPCMkappa2","GPCMkappa3",
                    "CTTtypeone1","CTTtypeone2","CTTtypeone3","CFAtypeone1","CFAtypeone2","CFAtypeone3","PCMtypeone1","PCMtypeone2","PCMtypeone3","GPCMtypeone1","GPCMtypeone2","GPCMtypeone3",
                    "CTTtypetwo1","CTTtypetwo2","CTTtypetwo3","CFAtypetwo1","CFAtypetwo2","CFAtypetwo3","PCMtypetwo1","PCMtypetwo2","PCMtypetwo3","GPCMtypetwo1","GPCMtypetwo2","GPCMtypetwo3")
-write.table(boat,"boat2.csv",row.names=F,sep=",")
+write.table(boat,"boat2-211019.csv",row.names=F,sep=",")
 geterrmessage()
