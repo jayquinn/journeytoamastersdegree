@@ -1,3 +1,4 @@
+
 matrix(data = 0, nrow = cond$nsize[k], ncol = 10) %>% as.data.frame -> paddle
 colnames(paddle)<-c("pers","mark",
                     "CTT","tmark",
@@ -108,8 +109,8 @@ paddle %>% select(contains("mark")) %>% lapply(as.factor) -> tmp
 
 tmp$mark %>% confusionMatrix(tmp$tmark) -> cfst
 tmp$mark %>% confusionMatrix(tmp$fmark) -> cfsf
-tmp$mark %>% confusionMatrix(tmp$pmark) -> cfsp
-tmp$mark %>% confusionMatrix(tmp$gmark) -> cfsg
+tmp$mark %>% confusionMatrix(tmp$pmark,positive = c("1","2","3")) -> cfsp
+tmp$mark %>% confusionMatrix(tmp$gmark,positive = c("1","2","3") ) -> cfsg
 
 
 
@@ -147,3 +148,8 @@ assign(paste0("cfsp3","c",k,"r",i),cfsp3)
 assign(paste0("cfsg1","c",k,"r",i),cfsg1)
 assign(paste0("cfsg2","c",k,"r",i),cfsg2)
 assign(paste0("cfsg3","c",k,"r",i),cfsg3)
+
+plot(paddle$pers,paddle$CTT)
+plot(paddle$pers,paddle$CFA)
+plot(paddle$pers,paddle$PCM)
+plot(paddle$pers,paddle$GPCM)
