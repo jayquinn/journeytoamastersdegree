@@ -168,7 +168,7 @@ table(C416,a416,useNA='always')
 table(C416)
 table(a416)
 length(C416);length(a416)
-#417 명령시행_읽고 눈감기 012
+#417 명령시행_읽고 눈감기 01
 a417<-ifelse(C417==3,1,
              ifelse(C417==1,1,
                     ifelse(C417==-8,NA,
@@ -202,7 +202,7 @@ attach(dat)
 response.raw<-data.frame(a401,a402,a403,a404,a405,a406,a407,a408,a409,a410,a411,a412,a413,a414,a415,a416,a417,a418,a419,dat$diag,dat$year,dat$edu,dat$gender)
 detach(dat)
 #### 진단정보(diag)  1 치매, 3경도인지장애, 5 정상
-#24~30 정상
+#24~30 정상 
 #18~23 경도인지장애
 #0~17 분명한 인지기능장애
 #### 진단정보 치매 + 경도인지장애 합치기
@@ -299,15 +299,14 @@ colnames(scoreframe)  <- c('CTT','CFA','PCM','GPCM','age','edu','gender','diag')
 
 quantile(sf$PCM,0.25)
 ##### 23점 이하 사람에게 마커 붙이기
-score.frame.t %>% mutate(markerCTT = case_when(CTT <= 23 ~ '1',
-                                            CTT > 23 ~ '0'),
-                         markerCFA = case_when(CFA <= quantile(sf$CFA,0.25) ~ '1',
-                                               CFA > quantile(sf$CFA,0.25) ~ '0'),
-                         markerPCM = case_when(PCM <= quantile(sf$PCM,0.25) ~ '1',
-                                               PCM > quantile(sf$PCM,0.25) ~ '0'),
-                         markerGPCM = case_when(GPCM <= quantile(sf$GPCM,0.25) ~ '1',
-                                               GPCM > quantile(sf$GPCM,0.25) ~ '0')
-                         ) -> sf
+score.frame.t %>% mutate(markerCTT = case_when(CTT <= quantile(score.frame.t$CTT,0.15) ~ '1',
+                                               CTT > quantile(score.frame.t$CTT,0.15) ~ '0'),
+                         markerCFA = case_when(CFA <= quantile(score.frame.t$CFA,0.15) ~ '1',
+                                               CFA > quantile(score.frame.t$CFA,0.15) ~ '0'),
+                         markerPCM = case_when(PCM <= quantile(score.frame.t$PCM,0.15) ~ '1',
+                                               PCM > quantile(score.frame.t$PCM,0.15) ~ '0'),
+                         markerGPCM = case_when(GPCM <= quantile(score.frame.t$GPCM,0.15) ~ '1',
+                                               GPCM > quantile(score.frame.t$GPCM,0.15) ~ '0')) -> sf
 
 
 # 이거 012 기준으로 qunatile 짜서 각 quantile 안에 누가 몇명 속해있는지 알아보고
