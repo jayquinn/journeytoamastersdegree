@@ -299,7 +299,7 @@ colnames(scoreframe)  <- c('CTT','CFA','PCM','GPCM','age','edu','gender','diag')
 
 quantile(sf$PCM,0.25)
 ##### 23점 이하 사람에게 마커 붙이기
-score.frame.t %>% mutate(markerCTT = case_when(CTT <= quantile(score.frame.t$CTT,0.15) ~ '1',
+#score.frame.t %>% mutate(markerCTT = case_when(CTT <= quantile(score.frame.t$CTT,0.15) ~ '1',
                                                CTT > quantile(score.frame.t$CTT,0.15) ~ '0'),
                          markerCFA = case_when(CFA <= quantile(score.frame.t$CFA,0.15) ~ '1',
                                                CFA > quantile(score.frame.t$CFA,0.15) ~ '0'),
@@ -308,7 +308,30 @@ score.frame.t %>% mutate(markerCTT = case_when(CTT <= quantile(score.frame.t$CTT
                          markerGPCM = case_when(GPCM <= quantile(score.frame.t$GPCM,0.15) ~ '1',
                                                GPCM > quantile(score.frame.t$GPCM,0.15) ~ '0')) -> sf
 
-
+##### 다중 분류 마커 severe (≤9 points), moderate (10–18 points) or mild (19–23 points) cognitive impairment.
+score.frame.t %>% mutate(markerCTT = case_when(CTT <= quantile(score.frame.t$CTT,0.025) ~ '1',
+                                               CTT <= quantile(score.frame.t$CTT,0.12) ~ '2',
+                                               CTT <= quantile(score.frame.t$CTT,0.27) ~ '3',
+                                               CTT > quantile(score.frame.t$CTT,0.27) ~ '0'),
+                         markerCFA = case_when(CFA <= quantile(score.frame.t$CFA,0.025) ~ '1',
+                                               CFA <= quantile(score.frame.t$CFA,0.12) ~ '2',
+                                               CFA <= quantile(score.frame.t$CFA,0.27) ~ '3',
+                                               CFA > quantile(score.frame.t$CFA,0.27) ~ '0'),
+                         markerPCM = case_when(PCM <= quantile(score.frame.t$PCM,0.025) ~ '1',
+                                               PCM <= quantile(score.frame.t$PCM,0.12) ~ '2',
+                                               PCM <= quantile(score.frame.t$PCM,0.27) ~ '3',
+                                               PCM > quantile(score.frame.t$PCM,0.27) ~ '0'),
+                         markerGPCM = case_when(GPCM <= quantile(score.frame.t$GPCM,0.025) ~ '1',
+                                                GPCM <= quantile(score.frame.t$GPCM,0.12) ~ '2',
+                                                GPCM <= quantile(score.frame.t$GPCM,0.27) ~ '3',
+                                                GPCM > quantile(score.frame.t$GPCM,0.27) ~ '0')) -> sf
+sf <- mutate_at(sf, vars(starts_with("marker")), as.factor)
+confusionMatrix(sf$markerCTT,sf$markerCFA) #K .8576
+confusionMatrix(sf$markerCTT,sf$markerPCM) #K .923
+confusionMatrix(sf$markerCTT,sf$markerGPCM) #K. 8645
+confusionMatrix(sf$markerCFA,sf$markerPCM) #K. 8683
+confusionMatrix(sf$markerCFA,sf$markerGPCM) #K. 9257
+confusionMatrix(sf$markerPCM,sf$markerGPCM) #K.8542
 # 이거 012 기준으로 qunatile 짜서 각 quantile 안에 누가 몇명 속해있는지 알아보고
 sf %>% filter(markerCTT == 1 & markerCFA == 1) %>% nrow() -> TP
 sf %>% filter(markerCTT == 0 & markerCFA == 1) %>% nrow() -> FP
