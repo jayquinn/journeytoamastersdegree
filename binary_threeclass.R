@@ -1,14 +1,15 @@
-matrix(data = 0, nrow = cond$nsize[k], ncol = 20) %>% as.data.frame -> paddle
-colnames(paddle)<-c("pers","mark1","mark2","mark3",
-                    "CTT","tmark1","tmark2","tmark3",
-                    "CFA","fmark1","fmark2","fmark3",
-                    "PCM","pmark1","pmark2","pmark3",
-                    "GPCM","gmark1","gmark2","gmark3")
+
+matrix(data = 0, nrow = cond$nsize[k], ncol = 10) %>% as.data.frame -> paddle
+colnames(paddle)<-c("pers","mark",
+                    "CTT","tmark",
+                    "CFA","fmark",
+                    "PCM","pmark",
+                    "GPCM","gmark")
 paddle$pers = rnorm(cond$nsize[k], mean = 0, sd = 1)
 paddle$pers %>% quantile(c(0.05,0.10,0.15)) -> personcrit
-paddle$mark1[which(paddle$pers<=personcrit[1])] <- 1
-paddle$mark2[which(paddle$pers<=personcrit[2])] <- 1
-paddle$mark3[which(paddle$pers<=personcrit[3])] <- 1
+paddle$mark[which(paddle$pers<=personcrit[3])] <- 3
+paddle$mark[which(paddle$pers<=personcrit[2])] <- 2
+paddle$mark[which(paddle$pers<=personcrit[1])] <- 1
 #hist(paddle$pers)
 
 a = runif(cond$nitem[k], min = cond$discmi[k] , max = cond$discma[k] )
@@ -20,16 +21,11 @@ N = paddle$pers
 response = simdata(a = si[,1], d = si[,2], N = length(N),Theta = as.matrix(paddle$pers), itemtype = '2PL')
 
 
-
-
-
-
-
 paddle$CTT = apply(response,1,sum)
 paddle$CTT %>% quantile(c(0.05,0.10,0.15)) -> CTTcrit
-paddle$tmark1[which(paddle$CTT<=CTTcrit[1])] <- 1
-paddle$tmark2[which(paddle$CTT<=CTTcrit[2])] <- 1
-paddle$tmark3[which(paddle$CTT<=CTTcrit[3])] <- 1
+paddle$tmark[which(paddle$CTT<=CTTcrit[3])] <- 3
+paddle$tmark[which(paddle$CTT<=CTTcrit[2])] <- 2
+paddle$tmark[which(paddle$CTT<=CTTcrit[1])] <- 1
 
 #hist(paddle$CTT)
 
@@ -58,9 +54,10 @@ tryCatch(expr = lavPredict(results.cfa, method = "regression", se = T),
 #hist(paddle$CFA)
 
 paddle$CFA %>% quantile(c(0.05,0.10,0.15)) -> CFAcrit
-paddle$fmark1[which(paddle$CFA<=CFAcrit[1])] <- 1
-paddle$fmark2[which(paddle$CFA<=CFAcrit[2])] <- 1
-paddle$fmark3[which(paddle$CFA<=CFAcrit[3])] <- 1
+paddle$fmark[which(paddle$CFA<=CFAcrit[3])] <- 3
+paddle$fmark[which(paddle$CFA<=CFAcrit[2])] <- 2
+paddle$fmark[which(paddle$CFA<=CFAcrit[1])] <- 1
+
 
 
 if (cond$nitem[k] == 10) {
@@ -82,9 +79,9 @@ tryCatch(expr = fscores(results.rasch,method = 'EAP'),
 #hist(paddle$PCM)# EAP(default) MAP ML WLE EAPsum
 
 paddle$PCM %>% quantile(c(0.05,0.10,0.15)) -> PCMcrit
-paddle$pmark1[which(paddle$PCM<=PCMcrit[1])] <- 1
-paddle$pmark2[which(paddle$PCM<=PCMcrit[2])] <- 1
-paddle$pmark3[which(paddle$PCM<=PCMcrit[3])] <- 1
+paddle$pmark[which(paddle$PCM<=PCMcrit[3])] <- 3
+paddle$pmark[which(paddle$PCM<=PCMcrit[2])] <- 2
+paddle$pmark[which(paddle$PCM<=PCMcrit[1])] <- 1
 
 
 if (cond$nitem[k] == 10) {
@@ -103,18 +100,56 @@ tryCatch(expr = fscores(results.2pl,method = 'EAP'),
          warning = function(e) cat(k ,"조건", i,"번째 반복에서 GPCM warning")) %>% as.vector() -> paddle$GPCM
 #hist(paddle$GPCM)# EAP(default) MAP ML WLE EAPsum
 paddle$GPCM %>% quantile(c(0.05,0.10,0.15)) -> GPCMcrit
-paddle$gmark1[which(paddle$GPCM<=GPCMcrit[1])] <- 1
-paddle$gmark2[which(paddle$GPCM<=GPCMcrit[2])] <- 1
-paddle$gmark3[which(paddle$GPCM<=GPCMcrit[3])] <- 1
+paddle$gmark[which(paddle$GPCM<=GPCMcrit[3])] <- 3
+paddle$gmark[which(paddle$GPCM<=GPCMcrit[2])] <- 2
+paddle$gmark[which(paddle$GPCM<=GPCMcrit[1])] <- 1
 
 
 paddle %>% select(contains("mark")) %>% lapply(as.factor) -> tmp
 
-tmp$mark3 %>% confusionMatrix(tmp$tmark3,positive = "1")
-tmp$mark3 %>% confusionMatrix(tmp$fmark3,positive = "1")
-tmp$mark3 %>% confusionMatrix(tmp$pmark3,positive = "1")
-tmp$mark3 %>% confusionMatrix(tmp$gmark3,positive = "1")
+tmp$mark %>% confusionMatrix(tmp$tmark,mode = "everything",positive = c("1","2","3"))
+tmp$mark %>% confusionMatrix(tmp$fmark,mode = "everything",positive = c("1","2","3"))
+tmp$mark %>% confusionMatrix(tmp$pmark,mode = "everything",positive = c("1","2","3"))
+tmp$mark %>% confusionMatrix(tmp$gmark,mode = "everything",positive = c("1","2","3"))
 
-tmp$mark1 %>% confusionMatrix(tmp$gmark1,positive = "1")
-tmp$mark2 %>% confusionMatrix(tmp$gmark2,positive = "1")
-tmp$mark3 %>% confusionMatrix(tmp$gmark3,positive = "1")
+
+
+tmp$mark1 %>% confusionMatrix(tmp$tmark1,positive = "1") -> cfst1
+tmp$mark2 %>% confusionMatrix(tmp$tmark2,positive = "1") -> cfst2
+tmp$mark3 %>% confusionMatrix(tmp$tmark3,positive = "1") -> cfst3
+tmp$mark1 %>% confusionMatrix(tmp$fmark1,positive = "1") -> cfsf1
+tmp$mark2 %>% confusionMatrix(tmp$fmark2,positive = "1") -> cfsf2
+tmp$mark3 %>% confusionMatrix(tmp$fmark3,positive = "1") -> cfsf3
+tmp$mark1 %>% confusionMatrix(tmp$pmark1,positive = "1") -> cfsp1
+tmp$mark2 %>% confusionMatrix(tmp$pmark2,positive = "1") -> cfsp2
+tmp$mark3 %>% confusionMatrix(tmp$pmark3,positive = "1") -> cfsp3
+tmp$mark1 %>% confusionMatrix(tmp$gmark1,positive = "1") -> cfsg1
+tmp$mark2 %>% confusionMatrix(tmp$gmark2,positive = "1") -> cfsg2
+tmp$mark3 %>% confusionMatrix(tmp$gmark3,positive = "1") -> cfsg3
+
+
+
+cfsg3
+########assign 친구들 #######
+assign(paste0("paddle","c",k,"r",i),tmp)
+assign(paste0("response","c",k,"r",i),response)
+assign(paste0("cfst1","c",k,"r",i),cfst1)
+assign(paste0("cfst2","c",k,"r",i),cfst2)
+assign(paste0("cfst3","c",k,"r",i),cfst3)
+
+assign(paste0("cfsf1","c",k,"r",i),cfsf1)
+assign(paste0("cfsf2","c",k,"r",i),cfsf2)
+assign(paste0("cfsf3","c",k,"r",i),cfsf3)
+
+assign(paste0("cfsp1","c",k,"r",i),cfsp1)
+assign(paste0("cfsp2","c",k,"r",i),cfsp2)
+assign(paste0("cfsp3","c",k,"r",i),cfsp3)
+
+assign(paste0("cfsg1","c",k,"r",i),cfsg1)
+assign(paste0("cfsg2","c",k,"r",i),cfsg2)
+assign(paste0("cfsg3","c",k,"r",i),cfsg3)
+
+plot(paddle$pers,paddle$CTT)
+plot(paddle$pers,paddle$CFA)
+plot(paddle$pers,paddle$PCM)
+plot(paddle$pers,paddle$GPCM)
