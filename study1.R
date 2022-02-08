@@ -132,33 +132,62 @@ score.CFA<-lavPredict(results.cfa,method = "regression")
 score.frame<-cbind(score.CTT,score.CFA,score.PCM,score.GPCM); colnames(score.frame)<-c("CTT","CFA","PCM","GPCM")
 as.data.frame(score.frame) -> score.frame
 #제 5 백분위수에 마커
-score.frame %>% mutate(markerCTT = case_when(CTT <= quantile(score.frame$CTT,0.5) ~ '1',
-                                               CTT > quantile(score.frame$CTT,0.5) ~ '0'),
-                         markerCFA = case_when(CFA <= quantile(score.frame$CFA,0.5) ~ '1',
-                                               CFA > quantile(score.frame$CFA,0.5) ~ '0'),
-                         markerPCM = case_when(PCM <= quantile(score.frame$PCM,0.5) ~ '1',
-                                               PCM > quantile(score.frame$PCM,0.5) ~ '0'),
-                         markerGPCM = case_when(GPCM <= quantile(score.frame$GPCM,0.5) ~ '1',
-                                                GPCM > quantile(score.frame$GPCM,0.5) ~ '0')) -> sf
-#종속변수 - 피어슨 상관계수
-cor(sf$CTT,sf$CFA)
-cor(sf$CTT,sf$PCM)
-cor(sf$CTT,sf$GPCM)
-cor(sf$CFA,sf$PCM)
-cor(sf$CFA,sf$GPCM)
-cor(sf$PCM,sf$GPCM)
-#종속변수 - 스피어만 상관계수
-cor(sf$CTT,sf$CFA,method="spearman")
-cor(sf$CTT,sf$PCM,method="spearman")
-cor(sf$CTT,sf$GPCM,method="spearman")
-cor(sf$CFA,sf$PCM,method="spearman")
-cor(sf$CFA,sf$GPCM,method="spearman")
-cor(sf$PCM,sf$GPCM,method="spearman")
+score.frame %>% mutate(markerCTT = case_when(CTT <= quantile(score.frame$CTT,0.25) ~ '1',
+                                               CTT > quantile(score.frame$CTT,0.25) ~ '0'),
+                         markerCFA = case_when(CFA <= quantile(score.frame$CFA,0.25) ~ '1',
+                                               CFA > quantile(score.frame$CFA,0.25) ~ '0'),
+                         markerPCM = case_when(PCM <= quantile(score.frame$PCM,0.25) ~ '1',
+                                               PCM > quantile(score.frame$PCM,0.25) ~ '0'),
+                         markerGPCM = case_when(GPCM <= quantile(score.frame$GPCM,0.25) ~ '1',
+                                                GPCM > quantile(score.frame$GPCM,0.25) ~ '0')) -> sf
 #종속변수 - 파이 계수
 sf <- mutate_at(sf, vars(starts_with("marker")), as.factor)
-phi(confusionMatrix(sf$markerCTT,sf$markerCFA)[[2]])
-phi(confusionMatrix(sf$markerCTT,sf$markerPCM)[[2]])
-phi(confusionMatrix(sf$markerCTT,sf$markerGPCM)[[2]])
-phi(confusionMatrix(sf$markerCFA,sf$markerPCM)[[2]])
-phi(confusionMatrix(sf$markerCFA,sf$markerGPCM)[[2]])
-phi(confusionMatrix(sf$markerPCM,sf$markerGPCM)[[2]])
+phi(confusionMatrix(sf$markerCTT,sf$markerCFA)[[2]],3)
+phi(confusionMatrix(sf$markerCTT,sf$markerPCM)[[2]],3)
+phi(confusionMatrix(sf$markerCTT,sf$markerGPCM)[[2]],3)
+phi(confusionMatrix(sf$markerCFA,sf$markerPCM)[[2]],3)
+phi(confusionMatrix(sf$markerCFA,sf$markerGPCM)[[2]],3)
+phi(confusionMatrix(sf$markerPCM,sf$markerGPCM)[[2]],3)
+#종속변수 - 피어슨 상관계수
+round(cor(sf$CTT,sf$CFA),3)
+round(cor(sf$CTT,sf$PCM),3)
+round(cor(sf$CTT,sf$GPCM),3)
+round(cor(sf$CFA,sf$PCM),3)
+round(cor(sf$CFA,sf$GPCM),3)
+round(cor(sf$PCM,sf$GPCM),3)
+#종속변수 - 스피어만 상관계수
+round(cor(sf$CTT,sf$CFA,method="spearman"),3)
+round(cor(sf$CTT,sf$PCM,method="spearman"),3)
+round(cor(sf$CTT,sf$GPCM,method="spearman"),3)
+round(cor(sf$CFA,sf$PCM,method="spearman"),3)
+round(cor(sf$CFA,sf$GPCM,method="spearman"),3)
+round(cor(sf$PCM,sf$GPCM,method="spearman"),3)
+# 전체 상관그림
+plot(score.frame)
+# 개별 상관그림
+plot(x =sf$CTT, y = sf$CFA,cex=0.5); fit<-loess.smooth(x=sf$CTT,y=sf$CFA); lines(fit$x,fit$y,lwd = 2)
+plot(x =sf$CTT, y = sf$PCM,cex=0.5); fit<-loess.smooth(x=sf$CTT,y=sf$PCM); lines(fit$x,fit$y,lwd = 2)
+plot(x =sf$CTT, y = sf$GPCM,cex=0.5); fit<-loess.smooth(x=sf$CTT,y=sf$GPCM); lines(fit$x,fit$y,lwd = 2)
+plot(x =sf$CFA, y = sf$PCM,cex=0.5); fit<-loess.smooth(x=sf$CFA,y=sf$PCM); lines(fit$x,fit$y,lwd = 2)
+plot(x =sf$CFA, y = sf$GPCM,cex=0.5); fit<-loess.smooth(x=sf$CFA,y=sf$GPCM); lines(fit$x,fit$y,lwd = 2)
+plot(x =sf$PCM, y = sf$GPCM,cex=0.5); fit<-loess.smooth(x=sf$PCM,y=sf$GPCM); lines(fit$x,fit$y,lwd = 2)
+
+png(filename="CTT-CFA.png",width=600,height=600,unit="px",bg="transparent")
+plot(x =sf$CTT, y = sf$CFA,cex=1.5,axes=F,ann=F); fit<-loess.smooth(x=sf$CTT,y=sf$CFA); lines(fit$x,fit$y,lwd = 2)
+dev.off()
+png(filename="CTT-PCM.png",width=600,height=600,unit="px",bg="transparent")
+plot(x =sf$CTT, y = sf$PCM,cex=1.5,axes=F,ann=F); fit<-loess.smooth(x=sf$CTT,y=sf$PCM); lines(fit$x,fit$y,lwd = 2)
+dev.off()
+png(filename="CTT-GPCM.png",width=600,height=600,unit="px",bg="transparent")
+plot(x =sf$CTT, y = sf$GPCM,cex=1,axes=F,ann=F); fit<-loess.smooth(x=sf$CTT,y=sf$GPCM); lines(fit$x,fit$y,lwd = 2)
+dev.off()
+png(filename="CFA-PCM.png",width=600,height=600,unit="px",bg="transparent")
+plot(x =sf$CFA, y = sf$PCM,cex=1,axes=F,ann=F); fit<-loess.smooth(x=sf$CFA,y=sf$PCM); lines(fit$x,fit$y,lwd = 2)
+dev.off()
+png(filename="CFA-GPCM.png",width=600,height=600,unit="px",bg="transparent")
+plot(x =sf$CFA, y = sf$GPCM,cex=1,axes=F,ann=F); fit<-loess.smooth(x=sf$CFA,y=sf$GPCM); lines(fit$x,fit$y,lwd = 2)
+dev.off()
+png(filename="PCM-GPCM.png",width=600,height=600,unit="px",bg="transparent")
+plot(x =sf$PCM, y = sf$GPCM,cex=1,axes=F,ann=F); fit<-loess.smooth(x=sf$PCM,y=sf$GPCM); lines(fit$x,fit$y,lwd = 2)
+dev.off()
+
