@@ -132,14 +132,14 @@ score.CFA<-lavPredict(results.cfa,method = "regression")
 score.frame<-cbind(score.CTT,score.CFA,score.PCM,score.GPCM); colnames(score.frame)<-c("CTT","CFA","PCM","GPCM")
 as.data.frame(score.frame) -> score.frame
 #제 5 백분위수에 마커
-score.frame %>% mutate(markerCTT = case_when(CTT <= quantile(score.frame$CTT,0.25) ~ '1',
-                                               CTT > quantile(score.frame$CTT,0.25) ~ '0'),
-                         markerCFA = case_when(CFA <= quantile(score.frame$CFA,0.25) ~ '1',
-                                               CFA > quantile(score.frame$CFA,0.25) ~ '0'),
-                         markerPCM = case_when(PCM <= quantile(score.frame$PCM,0.25) ~ '1',
-                                               PCM > quantile(score.frame$PCM,0.25) ~ '0'),
-                         markerGPCM = case_when(GPCM <= quantile(score.frame$GPCM,0.25) ~ '1',
-                                                GPCM > quantile(score.frame$GPCM,0.25) ~ '0')) -> sf
+score.frame %>% mutate(markerCTT = case_when(CTT <= quantile(score.frame$CTT,0.5) ~ '1',
+                                               CTT > quantile(score.frame$CTT,0.5) ~ '0'),
+                         markerCFA = case_when(CFA <= quantile(score.frame$CFA,0.5) ~ '1',
+                                               CFA > quantile(score.frame$CFA,0.5) ~ '0'),
+                         markerPCM = case_when(PCM <= quantile(score.frame$PCM,0.5) ~ '1',
+                                               PCM > quantile(score.frame$PCM,0.5) ~ '0'),
+                         markerGPCM = case_when(GPCM <= quantile(score.frame$GPCM,0.5) ~ '1',
+                                                GPCM > quantile(score.frame$GPCM,0.5) ~ '0')) -> sf
 #종속변수 - 파이 계수
 sf <- mutate_at(sf, vars(starts_with("marker")), as.factor)
 phi(confusionMatrix(sf$markerCTT,sf$markerCFA)[[2]],3)
@@ -148,6 +148,12 @@ phi(confusionMatrix(sf$markerCTT,sf$markerGPCM)[[2]],3)
 phi(confusionMatrix(sf$markerCFA,sf$markerPCM)[[2]],3)
 phi(confusionMatrix(sf$markerCFA,sf$markerGPCM)[[2]],3)
 phi(confusionMatrix(sf$markerPCM,sf$markerGPCM)[[2]],3)
+round(confusionMatrix(sf$markerCTT,sf$markerCFA)[[3]][[2]],3)
+round(confusionMatrix(sf$markerCTT,sf$markerPCM)[[3]][[2]],3)
+round(confusionMatrix(sf$markerCTT,sf$markerGPCM)[[3]][[2]],3)
+round(confusionMatrix(sf$markerCFA,sf$markerPCM)[[3]][[2]],3)
+round(confusionMatrix(sf$markerCFA,sf$markerGPCM)[[3]][[2]],3)
+round(confusionMatrix(sf$markerPCM,sf$markerGPCM)[[3]][[2]],3)
 #종속변수 - 피어슨 상관계수
 round(cor(sf$CTT,sf$CFA),3)
 round(cor(sf$CTT,sf$PCM),3)
