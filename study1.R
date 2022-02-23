@@ -128,6 +128,7 @@ score.GPCM<-fscores(results.gpcm,method = 'EAP')
 model.cfa<-'F1=~a401+a402+a403+a404+a405+a406+a407+a408+a409+a410+a411+a412+a413+a414+a415+a416+a417+a418+a419'
 results.cfa<-cfa(model=model.cfa,data = response)
 score.CFA<-lavPredict(results.cfa,method = "regression")
+summary(results.cfa, fit.measures = T)
 #점수 취합
 score.frame<-cbind(score.CTT,score.CFA,score.PCM,score.GPCM); colnames(score.frame)<-c("CTT","CFA","PCM","GPCM")
 as.data.frame(score.frame) -> score.frame
