@@ -120,7 +120,7 @@ for ( i in 1:nrow(response) ){
 model.pcm <- 'F1 = 1-19' 
 results.pcm <- mirt(data=response, model=model.pcm, itemtype="Rasch", SE=TRUE, verbose=FALSE)
 score.PCM<-fscores(results.pcm,method = 'EAP')
-#plot(results.pcm, type = 'score', theta_lim = c(-3, 3), main = "")
+#plot(results.pcm, type = 'score', theta_lim = c(-12, 3), main = "")
 #GPCM 점수 산출
 model.gpcm <- 'F1 = 1-19' 
 results.gpcm <- mirt(data=response, model=model.gpcm, itemtype="gpcm", SE=TRUE, verbose=FALSE)
