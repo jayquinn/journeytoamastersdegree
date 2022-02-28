@@ -1,4 +1,7 @@
 dat<-read.csv("C:/git/journeytoamastersdegree/mmse.csv",header=T,sep=",")
+# C420은 도움받은여부
+# str, w는 69~~이고 lt는 61인데 str, w가 다 포함함. 아마 lt는 추가 안된 오리지날 같고... 어쨋든 데이터 동일함.
+# 
 attach(dat) #코드 전처리 시작
 #401 시간지남력 - 연월일 0123 
 a401<-ifelse(C401==3,3,
@@ -107,8 +110,13 @@ a419<-ifelse(C419==1,1,
              ifelse(C419==-8,NA,
                     ifelse(C419==-9,0,
                            ifelse(C419==5,0,NA))))
+#420 도움받은정도 -9 모르겟음 -8 응답거부 1도움전혀받지않음 2가끔 3대부분
 #취합
 response<-data.frame(a401,a402,a403,a404,a405,a406,a407,a408,a409,a410,a411,a412,a413,a414,a415,a416,a417,a418,a419)
+#인지기능 저하자 마킹
+response$diag<-ifelse(dat$diag==5,0,
+                          ifelse(dat$diag==3,1,
+                                 ifelse(dat$diag==1,1,dat$diag))) #5 치매아님 -9 모르겟음 -8 응답거부 1 치매 3 경도인지장애
 #검사 응답이 모두 NA인 행제거
 response<- response %>% filter(!is.na(a401) & !is.na(a402) &!is.na(a403)&!is.na(a404)&!is.na(a405)&!is.na(a406)&!is.na(a407)&!is.na(a408)&!is.na(a409)&!is.na(a410)&!is.na(a411)&!is.na(a412)&!is.na(a413)&!is.na(a414)&!is.na(a415)&!is.na(a416)&!is.na(a417)&!is.na(a418)&!is.na(a419))
 detach(dat)
@@ -131,17 +139,17 @@ results.cfa<-cfa(model=model.cfa,data = response)
 score.CFA<-lavPredict(results.cfa,method = "regression")
 summary(results.cfa, fit.measures = T)
 #점수 취합
-score.frame<-cbind(score.CTT,score.CFA,score.PCM,score.GPCM); colnames(score.frame)<-c("CTT","CFA","PCM","GPCM")
+score.frame<-cbind(score.CTT,score.CFA,score.PCM,score.GPCM,response$diag); colnames(score.frame)<-c("CTT","CFA","PCM","GPCM","diag")
 as.data.frame(score.frame) -> score.frame
-#제 5 백분위수에 마커
-score.frame %>% mutate(markerCTT = case_when(CTT <= quantile(score.frame$CTT,0.5) ~ '1',
-                                               CTT > quantile(score.frame$CTT,0.5) ~ '0'),
-                         markerCFA = case_when(CFA <= quantile(score.frame$CFA,0.5) ~ '1',
-                                               CFA > quantile(score.frame$CFA,0.5) ~ '0'),
-                         markerPCM = case_when(PCM <= quantile(score.frame$PCM,0.5) ~ '1',
-                                               PCM > quantile(score.frame$PCM,0.5) ~ '0'),
-                         markerGPCM = case_when(GPCM <= quantile(score.frame$GPCM,0.5) ~ '1',
-                                                GPCM > quantile(score.frame$GPCM,0.5) ~ '0')) -> sf
+#제 25 백분위수에 마커
+score.frame %>% mutate(markerCTT = case_when(CTT <= quantile(score.frame$CTT,0.25) ~ '1',
+                                               CTT > quantile(score.frame$CTT,0.25) ~ '0'),
+                         markerCFA = case_when(CFA <= quantile(score.frame$CFA,0.25) ~ '1',
+                                               CFA > quantile(score.frame$CFA,0.25) ~ '0'),
+                         markerPCM = case_when(PCM <= quantile(score.frame$PCM,0.25) ~ '1',
+                                               PCM > quantile(score.frame$PCM,0.25) ~ '0'),
+                         markerGPCM = case_when(GPCM <= quantile(score.frame$GPCM,0.25) ~ '1',
+                                                GPCM > quantile(score.frame$GPCM,0.25) ~ '0')) -> sf
 #종속변수 - 파이 계수
 sf <- mutate_at(sf, vars(starts_with("marker")), as.factor)
 phi(confusionMatrix(sf$markerCTT,sf$markerCFA)[[2]],3)
@@ -199,3 +207,94 @@ png(filename="PCM-GPCM.png",width=600,height=600,unit="px",bg="transparent")
 plot(x =sf$PCM, y = sf$GPCM,cex=1,axes=F,ann=F); fit<-loess.smooth(x=sf$PCM,y=sf$GPCM); lines(fit$x,fit$y,lwd = 2)
 dev.off()
 
+# 종속변수 - ROC curve
+roc(diag ~ CTT, data = sf) # subset 확인해서 잘 써먹기 ?roc에 예제 있음
+roc(diag ~ CFA, data = sf)
+roc(diag ~ PCM, data = sf)
+roc(diag ~ GPCM, data = sf)
+# 종속변수 -PR curve
+# Create a ROC curve:
+data(aSAH)
+roc.s100b <- roc(aSAH$outcome, aSAH$s100b, percent = TRUE)
+# Get the coordinates of S100B threshold 0.55
+coords(roc.s100b, 0.55, transpose = FALSE)
+# Get the coordinates at 50% sensitivity
+coords(roc=roc.s100b, x=50, input="sensitivity", transpose = FALSE)
+# Can be abbreviated:
+coords(roc.s100b, 50, "se", transpose = FALSE)
+# Works with smoothed ROC curves
+coords(smooth(roc.s100b), 90, "specificity", transpose = FALSE)
+# Get the sensitivities for all thresholds
+cc <- coords(roc.s100b, "all", ret="sensitivity", transpose = FALSE)
+print(cc$sensitivity)
+# Get the best threshold
+coords(roc.s100b, "best", ret="threshold", transpose = FALSE)
+
+
+# Get the best threshold according to different methods
+roc.ndka <- roc(aSAH$outcome, aSAH$ndka, percent=TRUE)
+coords(roc.ndka, "best", ret="threshold", transpose = FALSE,
+       best.method="youden") # default
+coords(roc.ndka, "best", ret="threshold", transpose = FALSE,
+       best.method="closest.topleft")
+# and with different weights
+coords(roc.ndka, "best", ret="threshold", transpose = FALSE,
+       best.method="youden", best.weights=c(50, 0.2))
+coords(roc.ndka, "best", ret="threshold", transpose = FALSE,
+       best.method="closest.topleft", best.weights=c(5, 0.2))
+# This is available with the plot.roc function too:
+plot(roc.ndka, print.thres="best", print.thres.best.method="youden",
+     print.thres.best.weights=c(50, 0.2))
+# Return more values:
+coords(roc.s100b, "best", ret=c("threshold", "specificity", "sensitivity", "accuracy",
+                                "precision", "recall"), transpose = FALSE)
+# Return all values
+coords(roc.s100b, "best", ret = "all", transpose = FALSE)
+# You can use coords to plot for instance a sensitivity + specificity vs. cut-off diagram
+plot(specificity + sensitivity ~ threshold,
+     coords(roc.ndka, "all", transpose = FALSE),
+     type = "l", log="x",
+     subset = is.finite(threshold))
+# Plot the Precision-Recall curve
+plot(precision ~ recall,
+     coords(roc.ndka, "all", ret = c("recall", "precision"), transpose = FALSE),
+     type="l", ylim = c(0, 100))
+
+
+
+
+
+
+
+
+
+
+
+# Get the best threshold according to different methods
+roc.ndka <- roc(sf$diag, sf$GPCM, percent=TRUE)
+# Plot the Precision-Recall curve
+plot(precision ~ recall,
+     coords(roc.ndka, "all", ret = c("recall", "precision"), transpose = FALSE),
+     type="l", ylim = c(0, 100))
+
+# This is available with the plot.roc function too:
+plot(roc.ndka, print.thres="best", print.thres.best.method="youden",
+     print.thres.best.weights=c(50, 0.2))
+
+
+
+
+confusionMatrix(sf$markerCTT,as.factor(sf$diag),positive = "1")
+#recall = 0.8941176
+confusionMatrix(sf$markerCFA,as.factor(sf$diag),positive = "1")
+#recall = 0.8588235
+confusionMatrix(sf$markerPCM,as.factor(sf$diag),positive = "1")
+#recall = 0.8823529
+confusionMatrix(sf$markerGPCM,as.factor(sf$diag),positive = "1")
+#recall = 0.8588235
+
+
+pr = pr.curve(scores.class0=sf[sf$diag=="1",]$GPCM,scores.class1 = sf[sf$diag=="0",]$GPCM, curve=T)
+plot(pr)
+y <- as.data.frame(pr$curve)
+ggplot(y, aes(y$V1, y$V2))+geom_path()+ylim(0,1)
