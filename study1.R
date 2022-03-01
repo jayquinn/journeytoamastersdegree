@@ -151,20 +151,12 @@ score.frame %>% mutate(markerCTT = case_when(CTT <= quantile(score.frame$CTT,0.2
                                                PCM > quantile(score.frame$PCM,0.25) ~ '0'),
                          markerGPCM = case_when(GPCM <= quantile(score.frame$GPCM,0.25) ~ '1',
                                                 GPCM > quantile(score.frame$GPCM,0.25) ~ '0')) -> sf
-#topleft에 마커
-score.frame %>% mutate(markerCTT = case_when(CTT <= 20.5 ~ '1',
-                                             CTT > 20.5 ~ '0'),
-                       markerCFA = case_when(CFA <= -0.341 ~ '1',
-                                             CFA > -0.341 ~ '0'),
-                       markerPCM = case_when(PCM <= -1.446 ~ '1',
-                                             PCM > -1.446 ~ '0'),
-                       markerGPCM = case_when(GPCM <= -0.892 ~ '1',
-                                              GPCM > -0.892 ~ '0')) -> sf
-#이상만(60세)
-#sf %>% filter(age >= 70) -> sf
-#종속변수 - 파이 계수
+
 sf <- mutate_at(sf, vars(starts_with("marker")), as.factor)
 sf$diag <- as.factor(sf$diag)
+#이상만(70세)
+sf %>% filter(age >= 100) -> sf
+#종속변수 - 파이 계수
 phi(confusionMatrix(sf$markerCTT,sf$markerCFA)[[2]],3)
 phi(confusionMatrix(sf$markerCTT,sf$markerPCM)[[2]],3)
 phi(confusionMatrix(sf$markerCTT,sf$markerGPCM)[[2]],3)
@@ -183,7 +175,7 @@ confusionMatrix(sf$markerCTT ,sf$diag, mode = "everything", positive="1")
 confusionMatrix(sf$markerCFA ,sf$diag, mode = "everything", positive="1")
 confusionMatrix(sf$markerPCM ,sf$diag, mode = "everything", positive="1")
 confusionMatrix(sf$markerGPCM ,sf$diag, mode = "everything", positive="1")
-#종속변수 - 피어슨 상관계수
+a#종속변수 - 피어슨 상관계수
 round(cor(sf$CTT,sf$CFA),3)
 round(cor(sf$CTT,sf$PCM),3)
 round(cor(sf$CTT,sf$GPCM),3)
