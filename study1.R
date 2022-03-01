@@ -151,10 +151,20 @@ score.frame %>% mutate(markerCTT = case_when(CTT <= quantile(score.frame$CTT,0.2
                                                PCM > quantile(score.frame$PCM,0.25) ~ '0'),
                          markerGPCM = case_when(GPCM <= quantile(score.frame$GPCM,0.25) ~ '1',
                                                 GPCM > quantile(score.frame$GPCM,0.25) ~ '0')) -> sf
-#이상만(70세)
-sf %>% filter(age >= 70) -> sf
+#topleft에 마커
+score.frame %>% mutate(markerCTT = case_when(CTT <= 20.5 ~ '1',
+                                             CTT > 20.5 ~ '0'),
+                       markerCFA = case_when(CFA <= -0.341 ~ '1',
+                                             CFA > -0.341 ~ '0'),
+                       markerPCM = case_when(PCM <= -1.446 ~ '1',
+                                             PCM > -1.446 ~ '0'),
+                       markerGPCM = case_when(GPCM <= -0.892 ~ '1',
+                                              GPCM > -0.892 ~ '0')) -> sf
+#이상만(60세)
+#sf %>% filter(age >= 70) -> sf
 #종속변수 - 파이 계수
 sf <- mutate_at(sf, vars(starts_with("marker")), as.factor)
+sf$diag <- as.factor(sf$diag)
 phi(confusionMatrix(sf$markerCTT,sf$markerCFA)[[2]],3)
 phi(confusionMatrix(sf$markerCTT,sf$markerPCM)[[2]],3)
 phi(confusionMatrix(sf$markerCTT,sf$markerGPCM)[[2]],3)
@@ -168,6 +178,11 @@ round(confusionMatrix(sf$markerCTT,sf$markerGPCM)[[3]][[2]],3)
 round(confusionMatrix(sf$markerCFA,sf$markerPCM)[[3]][[2]],3)
 round(confusionMatrix(sf$markerCFA,sf$markerGPCM)[[3]][[2]],3)
 round(confusionMatrix(sf$markerPCM,sf$markerGPCM)[[3]][[2]],3)
+#f1 score
+confusionMatrix(sf$markerCTT ,sf$diag, mode = "everything", positive="1")
+confusionMatrix(sf$markerCFA ,sf$diag, mode = "everything", positive="1")
+confusionMatrix(sf$markerPCM ,sf$diag, mode = "everything", positive="1")
+confusionMatrix(sf$markerGPCM ,sf$diag, mode = "everything", positive="1")
 #종속변수 - 피어슨 상관계수
 round(cor(sf$CTT,sf$CFA),3)
 round(cor(sf$CTT,sf$PCM),3)
@@ -212,10 +227,10 @@ plot(x =sf$PCM, y = sf$GPCM,cex=1,axes=F,ann=F); fit<-loess.smooth(x=sf$PCM,y=sf
 dev.off()
 
 # 종속변수 - ROC curve
-roc(diag ~ CTT, data = sf) # subset 확인해서 잘 써먹기 ?roc에 예제 있음
-roc(diag ~ CFA, data = sf)
-roc(diag ~ PCM, data = sf)
-roc(diag ~ GPCM, data = sf)
+plot.roc(diag ~ CTT,print.auc=T,print.thres="best",print.thres.best.method="closest.topleft", data = sf) # subset 확인해서 잘 써먹기 ?roc에 예제 있음
+plot.roc(diag ~ CFA, data = sf,print.auc=T,print.thres="best",print.thres.best.method="closest.topleft")
+plot.roc(diag ~ PCM, data = sf,print.auc=T,print.thres="best",print.thres.best.method="closest.topleft")
+plot.roc(diag ~ GPCM, data = sf,print.auc=T,print.thres="best",print.thres.best.method="closest.topleft")
 # 종속변수 -PR curve
 # Create a ROC curve:
 data(aSAH)
@@ -298,7 +313,7 @@ confusionMatrix(sf$markerGPCM,as.factor(sf$diag),positive = "1")
 #recall = 0.8588235
 
 
-pr = pr.curve(scores.class0=sf[sf$diag=="1",]$GPCM,scores.class1 = sf[sf$diag=="0",]$GPCM, curve=T)
+pr = pr.curve(scores.class0=sf[sf$diag=="1",]$CTT,scores.class1 = sf[sf$diag=="0",]$CTT, curve=T)
 plot(pr)
 y <- as.data.frame(pr$curve)
 ggplot(y, aes(y$V1, y$V2))+geom_path()+ylim(0,1)
