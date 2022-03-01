@@ -1,7 +1,6 @@
 dat<-read.csv("C:/git/journeytoamastersdegree/mmse.csv",header=T,sep=",")
 # C420은 도움받은여부
 # str, w는 69~~이고 lt는 61인데 str, w가 다 포함함. 아마 lt는 추가 안된 오리지날 같고... 어쨋든 데이터 동일함.
-# 
 attach(dat) #코드 전처리 시작
 #401 시간지남력 - 연월일 0123 
 a401<-ifelse(C401==3,3,
@@ -117,6 +116,8 @@ response<-data.frame(a401,a402,a403,a404,a405,a406,a407,a408,a409,a410,a411,a412
 response$diag<-ifelse(dat$diag==5,0,
                           ifelse(dat$diag==3,1,
                                  ifelse(dat$diag==1,1,dat$diag))) #5 치매아님 -9 모르겟음 -8 응답거부 1 치매 3 경도인지장애
+#나이 입력
+response$age = 2022-dat$year
 #검사 응답이 모두 NA인 행제거
 response<- response %>% filter(!is.na(a401) & !is.na(a402) &!is.na(a403)&!is.na(a404)&!is.na(a405)&!is.na(a406)&!is.na(a407)&!is.na(a408)&!is.na(a409)&!is.na(a410)&!is.na(a411)&!is.na(a412)&!is.na(a413)&!is.na(a414)&!is.na(a415)&!is.na(a416)&!is.na(a417)&!is.na(a418)&!is.na(a419))
 detach(dat)
@@ -126,20 +127,20 @@ for ( i in 1:nrow(response) ){
   score.CTT[[i]]<-sum(response[i,1:19],na.rm=T)}
 #PCM 점수 산출
 model.pcm <- 'F1 = 1-19' 
-results.pcm <- mirt(data=response, model=model.pcm, itemtype="Rasch", SE=TRUE, verbose=FALSE)
+results.pcm <- mirt(data=response[,1:19], model=model.pcm, itemtype="Rasch", SE=TRUE, verbose=FALSE)
 score.PCM<-fscores(results.pcm,method = 'EAP')
 #plot(results.pcm, type = 'score', theta_lim = c(-12, 3), main = "")
 #GPCM 점수 산출
 model.gpcm <- 'F1 = 1-19' 
-results.gpcm <- mirt(data=response, model=model.gpcm, itemtype="gpcm", SE=TRUE, verbose=FALSE)
+results.gpcm <- mirt(data=response[,1:19], model=model.gpcm, itemtype="gpcm", SE=TRUE, verbose=FALSE)
 score.GPCM<-fscores(results.gpcm,method = 'EAP')
 #CFA 점수 산출
 model.cfa<-'F1=~a401+a402+a403+a404+a405+a406+a407+a408+a409+a410+a411+a412+a413+a414+a415+a416+a417+a418+a419'
-results.cfa<-cfa(model=model.cfa,data = response)
+results.cfa<-cfa(model=model.cfa,data = response[,1:19])
 score.CFA<-lavPredict(results.cfa,method = "regression")
 summary(results.cfa, fit.measures = T)
 #점수 취합
-score.frame<-cbind(score.CTT,score.CFA,score.PCM,score.GPCM,response$diag); colnames(score.frame)<-c("CTT","CFA","PCM","GPCM","diag")
+score.frame<-cbind(score.CTT,score.CFA,score.PCM,score.GPCM,response$diag,response$age); colnames(score.frame)<-c("CTT","CFA","PCM","GPCM","diag","age")
 as.data.frame(score.frame) -> score.frame
 #제 25 백분위수에 마커
 score.frame %>% mutate(markerCTT = case_when(CTT <= quantile(score.frame$CTT,0.25) ~ '1',
@@ -150,6 +151,8 @@ score.frame %>% mutate(markerCTT = case_when(CTT <= quantile(score.frame$CTT,0.2
                                                PCM > quantile(score.frame$PCM,0.25) ~ '0'),
                          markerGPCM = case_when(GPCM <= quantile(score.frame$GPCM,0.25) ~ '1',
                                                 GPCM > quantile(score.frame$GPCM,0.25) ~ '0')) -> sf
+#이상만(70세)
+sf %>% filter(age >= 70) -> sf
 #종속변수 - 파이 계수
 sf <- mutate_at(sf, vars(starts_with("marker")), as.factor)
 phi(confusionMatrix(sf$markerCTT,sf$markerCFA)[[2]],3)
@@ -158,6 +161,7 @@ phi(confusionMatrix(sf$markerCTT,sf$markerGPCM)[[2]],3)
 phi(confusionMatrix(sf$markerCFA,sf$markerPCM)[[2]],3)
 phi(confusionMatrix(sf$markerCFA,sf$markerGPCM)[[2]],3)
 phi(confusionMatrix(sf$markerPCM,sf$markerGPCM)[[2]],3)
+#카파
 round(confusionMatrix(sf$markerCTT,sf$markerCFA)[[3]][[2]],3)
 round(confusionMatrix(sf$markerCTT,sf$markerPCM)[[3]][[2]],3)
 round(confusionMatrix(sf$markerCTT,sf$markerGPCM)[[3]][[2]],3)
@@ -179,7 +183,7 @@ round(cor(sf$CFA,sf$PCM,method="spearman"),3)
 round(cor(sf$CFA,sf$GPCM,method="spearman"),3)
 round(cor(sf$PCM,sf$GPCM,method="spearman"),3)
 # 전체 상관그림
-plot(score.frame)
+plot(sf[,1:4])
 # 개별 상관그림
 plot(x =sf$CTT, y = sf$CFA,cex=0.5); fit<-loess.smooth(x=sf$CTT,y=sf$CFA); lines(fit$x,fit$y,lwd = 2)
 plot(x =sf$CTT, y = sf$PCM,cex=0.5); fit<-loess.smooth(x=sf$CTT,y=sf$PCM); lines(fit$x,fit$y,lwd = 2)
@@ -288,7 +292,7 @@ confusionMatrix(sf$markerCTT,as.factor(sf$diag),positive = "1")
 #recall = 0.8941176
 confusionMatrix(sf$markerCFA,as.factor(sf$diag),positive = "1")
 #recall = 0.8588235
-confusionMatrix(sf$markerPCM,as.factor(sf$diag),positive = "1")
+confusionMatrix(as.factor(sf$markerPCM),as.factor(sf$diag),positive = "1")
 #recall = 0.8823529
 confusionMatrix(sf$markerGPCM,as.factor(sf$diag),positive = "1")
 #recall = 0.8588235
