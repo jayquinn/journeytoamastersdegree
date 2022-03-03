@@ -155,7 +155,7 @@ score.frame %>% mutate(markerCTT = case_when(CTT <= quantile(score.frame$CTT,0.2
 sf <- mutate_at(sf, vars(starts_with("marker")), as.factor)
 sf$diag <- as.factor(sf$diag)
 #이상만(70세)
-sf %>% filter(age>90 & age<=120) -> sf
+sf %>% filter(age>90 & age<=110) -> sf
 #종속변수 - 파이 계수
 phi(confusionMatrix(sf$markerCTT,sf$markerCFA)[[2]],3)
 phi(confusionMatrix(sf$markerCTT,sf$markerPCM)[[2]],3)
@@ -219,10 +219,10 @@ plot(x =sf$PCM, y = sf$GPCM,cex=1,axes=F,ann=F); fit<-loess.smooth(x=sf$PCM,y=sf
 dev.off()
 
 # 종속변수 - ROC curve
-plot.roc(diag ~ CTT,print.auc=T,print.thres="best",print.thres.best.method="closest.topleft", data = sf) # subset 확인해서 잘 써먹기 ?roc에 예제 있음
-plot.roc(diag ~ CFA, data = sf,print.auc=T,print.thres="best",print.thres.best.method="closest.topleft")
-plot.roc(diag ~ PCM, data = sf,print.auc=T,print.thres="best",print.thres.best.method="closest.topleft")
-plot.roc(diag ~ GPCM, data = sf,print.auc=T,print.thres="best",print.thres.best.method="closest.topleft")
+plot.roc(diag ~ CTT,print.auc=T,print.thres="best",print.thres.best.method="youden", data = sf) # subset 확인해서 잘 써먹기 ?roc에 예제 있음
+plot.roc(diag ~ CFA, data = sf,print.auc=T,print.thres="best",print.thres.best.method="youden")
+plot.roc(diag ~ PCM, data = sf,print.auc=T,print.thres="best",print.thres.best.method="youden")
+plot.roc(diag ~ GPCM, data = sf,print.auc=T,print.thres="best",print.thres.best.method="youden")
 # 종속변수 -PR curve
 # Create a ROC curve:
 data(aSAH)
