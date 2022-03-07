@@ -135,10 +135,18 @@ model.gpcm <- 'F1 = 1-19'
 results.gpcm <- mirt(data=response[,1:19], model=model.gpcm, itemtype="gpcm", SE=TRUE, verbose=FALSE)
 score.GPCM<-fscores(results.gpcm,method = 'EAP')
 #CFA 점수 산출
-model.cfa<-'F1=~a401+a402+a403+a404+a405+a406+a407+a408+a409+a410+a411+a412+a413+a414+a415+a416+a417+a418+a419'
-results.cfa<-cfa(model=model.cfa,data = response[,1:19])
-score.CFA<-lavPredict(results.cfa,method = "regression")
-summary(results.cfa, fit.measures = T)
+#model.cfa<-'F1=~a401+a402+a403+a404+a405+a406+a407+a408+a409+a410+a411+a412+a413+a414+a415+a416+a417+a418+a419'
+#results.cfa<-cfa(model=model.cfa,data = response[,1:19])
+#score.CFA<-lavPredict(results.cfa,method = "regression")
+#summary(results.cfa, fit.measures = T)
+#PCA 점수 산출
+cormat = cor(response[,1:19])
+scree(response[,1:19])
+VSS.scree(cormat)
+results.pca = principal(response[,1:19],nfactors=1,residuals = T,scores=T,cor = "cor",method="regression")
+predict(results.pca,response[,1:19])
+range(predict(results.pca,response[,1:19]))
+hist(predict(results.pca,response[,1:19]))
 #점수 취합
 score.frame<-cbind(score.CTT,score.CFA,score.PCM,score.GPCM,response$diag,response$age); colnames(score.frame)<-c("CTT","CFA","PCM","GPCM","diag","age")
 as.data.frame(score.frame) -> score.frame

@@ -8,6 +8,7 @@ library("PRROC") # PR curve
 library(pROC) #ROC curve - roc
 library("Epi") #ROC curve - ROC
 library("ROCR")
+library(psych)
 # cohen.kappa 랑 wkappa ?cohen.kappa
 # mirt simdata
 # psych https://personality-project.org/r/html/sim.html
