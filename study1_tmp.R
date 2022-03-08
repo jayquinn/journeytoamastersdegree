@@ -114,14 +114,11 @@ a419<-ifelse(C419==1,1,
 response<-data.frame(a401,a402,a403,a404,a405,a406,a407,a408,a409,a410,a411,a412,a413,a414,a415,a416,a417,a418,a419)
 #인지기능 저하자 마킹
 response$diag<-ifelse(dat$diag==5,0,
-                          ifelse(dat$diag==3,1,
-                                 ifelse(dat$diag==1,1,dat$diag))) #5 치매아님 -9 모르겟음 -8 응답거부 1 치매 3 경도인지장애
+                      ifelse(dat$diag==3,1,
+                             ifelse(dat$diag==1,1,dat$diag))) #5 치매아님 -9 모르겟음 -8 응답거부 1 치매 3 경도인지장애
 #나이 입력
 response$age = 2018-dat$year
-<<<<<<< HEAD
 response$gender = dat$gender # 1 = 남자, 5 = 여자
-=======
->>>>>>> 76553033dd6ac9c9f1355c6a1863649d57f0c8a4
 #검사 응답이 모두 NA인 행제거
 response<- response %>% filter(!is.na(a401) & !is.na(a402) &!is.na(a403)&!is.na(a404)&!is.na(a405)&!is.na(a406)&!is.na(a407)&!is.na(a408)&!is.na(a409)&!is.na(a410)&!is.na(a411)&!is.na(a412)&!is.na(a413)&!is.na(a414)&!is.na(a415)&!is.na(a416)&!is.na(a417)&!is.na(a418)&!is.na(a419))
 detach(dat)
@@ -155,36 +152,25 @@ hist(predict(results.pca,response[,1:19]))
 score.frame<-cbind(score.CTT,score.CFA,score.PCM,score.GPCM,response$diag,response$age,response$gender); colnames(score.frame)<-c("CTT","CFA","PCM","GPCM","diag","age","gender")
 as.data.frame(score.frame) -> score.frame
 #제 25 백분위수에 마커
-<<<<<<< HEAD
 score.frame %>% mutate(markerCTT = case_when(CTT <= quantile(score.frame$CTT,0.25) ~ '1',
-                                               CTT > quantile(score.frame$CTT,0.25) ~ '0'),
-                         markerCFA = case_when(CFA <= quantile(score.frame$CFA,0.25) ~ '1',
-                                               CFA > quantile(score.frame$CFA,0.25) ~ '0'),
-                         markerPCM = case_when(PCM <= quantile(score.frame$PCM,0.25) ~ '1',
-                                               PCM > quantile(score.frame$PCM,0.25) ~ '0'),
-                         markerGPCM = case_when(GPCM <= quantile(score.frame$GPCM,0.25) ~ '1',
-                                                GPCM > quantile(score.frame$GPCM,0.25) ~ '0')) -> sf
+                                             CTT > quantile(score.frame$CTT,0.25) ~ '0'),
+                       markerCFA = case_when(CFA <= quantile(score.frame$CFA,0.25) ~ '1',
+                                             CFA > quantile(score.frame$CFA,0.25) ~ '0'),
+                       markerPCM = case_when(PCM <= quantile(score.frame$PCM,0.25) ~ '1',
+                                             PCM > quantile(score.frame$PCM,0.25) ~ '0'),
+                       markerGPCM = case_when(GPCM <= quantile(score.frame$GPCM,0.25) ~ '1',
+                                              GPCM > quantile(score.frame$GPCM,0.25) ~ '0')) -> sf
 sf %>% mutate(agegroup = case_when(age >= 91 ~ '4',
                                    age >= 81  & age < 91 ~ '3',
                                    age >= 71  & age < 81 ~ '2',
                                    age < 71 ~ '1')) -> sf
-=======
-score.frame %>% mutate(markerCTT = case_when(CTT <= quantile(score.frame$CTT,0.05) ~ '1',
-                                               CTT > quantile(score.frame$CTT,0.05) ~ '0'),
-                         markerCFA = case_when(CFA <= quantile(score.frame$CFA,0.05) ~ '1',
-                                               CFA > quantile(score.frame$CFA,0.05) ~ '0'),
-                         markerPCM = case_when(PCM <= quantile(score.frame$PCM,0.05) ~ '1',
-                                               PCM > quantile(score.frame$PCM,0.05) ~ '0'),
-                         markerGPCM = case_when(GPCM <= quantile(score.frame$GPCM,0.05) ~ '1',
-                                                GPCM > quantile(score.frame$GPCM,0.05) ~ '0')) -> sf
->>>>>>> 76553033dd6ac9c9f1355c6a1863649d57f0c8a4
 
 sf <- mutate_at(sf, vars(starts_with("marker")), as.factor)
 sf$diag <- as.factor(sf$diag)
 
 
 #이상만(70세)
-sf %>% filter(age>60&age<=70) -> sf # 
+sf %>% filter(age>90 & age<=110) -> sf
 #종속변수 - 파이 계수
 phi(confusionMatrix(sf$markerCTT,sf$markerCFA)[[2]],3)
 phi(confusionMatrix(sf$markerCTT,sf$markerPCM)[[2]],3)
