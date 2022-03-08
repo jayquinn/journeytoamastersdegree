@@ -117,7 +117,8 @@ response$diag<-ifelse(dat$diag==5,0,
                           ifelse(dat$diag==3,1,
                                  ifelse(dat$diag==1,1,dat$diag))) #5 치매아님 -9 모르겟음 -8 응답거부 1 치매 3 경도인지장애
 #나이 입력
-response$age = 2022-dat$year
+response$age = 2018-dat$year
+response$gender = dat$gender # 1 = 남자, 5 = 여자
 #검사 응답이 모두 NA인 행제거
 response<- response %>% filter(!is.na(a401) & !is.na(a402) &!is.na(a403)&!is.na(a404)&!is.na(a405)&!is.na(a406)&!is.na(a407)&!is.na(a408)&!is.na(a409)&!is.na(a410)&!is.na(a411)&!is.na(a412)&!is.na(a413)&!is.na(a414)&!is.na(a415)&!is.na(a416)&!is.na(a417)&!is.na(a418)&!is.na(a419))
 detach(dat)
@@ -135,10 +136,10 @@ model.gpcm <- 'F1 = 1-19'
 results.gpcm <- mirt(data=response[,1:19], model=model.gpcm, itemtype="gpcm", SE=TRUE, verbose=FALSE)
 score.GPCM<-fscores(results.gpcm,method = 'EAP')
 #CFA 점수 산출
-#model.cfa<-'F1=~a401+a402+a403+a404+a405+a406+a407+a408+a409+a410+a411+a412+a413+a414+a415+a416+a417+a418+a419'
-#results.cfa<-cfa(model=model.cfa,data = response[,1:19])
-#score.CFA<-lavPredict(results.cfa,method = "regression")
-#summary(results.cfa, fit.measures = T)
+model.cfa<-'F1=~a401+a402+a403+a404+a405+a406+a407+a408+a409+a410+a411+a412+a413+a414+a415+a416+a417+a418+a419'
+results.cfa<-cfa(model=model.cfa,data = response[,1:19])
+score.CFA<-lavPredict(results.cfa,method = "regression")
+summary(results.cfa, fit.measures = T)
 #PCA 점수 산출
 cormat = cor(response[,1:19])
 scree(response[,1:19])
@@ -148,7 +149,7 @@ predict(results.pca,response[,1:19])
 range(predict(results.pca,response[,1:19]))
 hist(predict(results.pca,response[,1:19]))
 #점수 취합
-score.frame<-cbind(score.CTT,score.CFA,score.PCM,score.GPCM,response$diag,response$age); colnames(score.frame)<-c("CTT","CFA","PCM","GPCM","diag","age")
+score.frame<-cbind(score.CTT,score.CFA,score.PCM,score.GPCM,response$diag,response$age,response$gender); colnames(score.frame)<-c("CTT","CFA","PCM","GPCM","diag","age","gender")
 as.data.frame(score.frame) -> score.frame
 #제 25 백분위수에 마커
 score.frame %>% mutate(markerCTT = case_when(CTT <= quantile(score.frame$CTT,0.25) ~ '1',
@@ -159,9 +160,15 @@ score.frame %>% mutate(markerCTT = case_when(CTT <= quantile(score.frame$CTT,0.2
                                                PCM > quantile(score.frame$PCM,0.25) ~ '0'),
                          markerGPCM = case_when(GPCM <= quantile(score.frame$GPCM,0.25) ~ '1',
                                                 GPCM > quantile(score.frame$GPCM,0.25) ~ '0')) -> sf
+sf %>% mutate(agegroup = case_when(age >= 91 ~ '4',
+                                   age >= 81  & age < 91 ~ '3',
+                                   age >= 71  & age < 81 ~ '2',
+                                   age < 71 ~ '1')) -> sf
 
 sf <- mutate_at(sf, vars(starts_with("marker")), as.factor)
 sf$diag <- as.factor(sf$diag)
+
+
 #이상만(70세)
 sf %>% filter(age>90 & age<=110) -> sf
 #종속변수 - 파이 계수

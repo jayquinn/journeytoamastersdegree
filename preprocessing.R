@@ -9,6 +9,9 @@ library(pROC) #ROC curve - roc
 library("Epi") #ROC curve - ROC
 library("ROCR")
 library(psych)
+library(ggplot2)
+library(cowplot) # plot_grid
+library(gridExtra) #grid.arrange
 # cohen.kappa 랑 wkappa ?cohen.kappa
 # mirt simdata
 # psych https://personality-project.org/r/html/sim.html
