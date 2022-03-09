@@ -12,6 +12,7 @@ library(psych)
 library(ggplot2)
 library(cowplot) # plot_grid
 library(gridExtra) #grid.arrange
+library(lmtest)
 # cohen.kappa 랑 wkappa ?cohen.kappa
 # mirt simdata
 # psych https://personality-project.org/r/html/sim.html
