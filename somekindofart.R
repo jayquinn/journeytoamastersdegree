@@ -47,6 +47,63 @@ D = ggplot(data = filter(sf, sf$gender == 5), aes(sample = PCA)) + stat_qq() + c
 
 grid.arrange(arrangeGrob(A,B,widths=c(2.5,1),ncol=2) , arrangeGrob(C,D,widths=c(2.5,1),ncol=2), nrow = 2)
 
+#연령별 qq
+A = ggplot(data = filter(sf, sf$gender == 1, sf$agegroup == 1), aes(sample = PCA)) + stat_qq() + coord_flip()  + theme_bw() + stat_qq_line() +
+  scale_y_continuous("sample quantiles male 1") + 
+  scale_x_continuous("theoretical quatiles")
+B = ggplot(data = filter(sf, sf$gender == 1, sf$agegroup == 2), aes(sample = PCA)) + stat_qq() + coord_flip()  + theme_bw() + stat_qq_line() +
+  scale_y_continuous("sample quantiles male 2") + 
+  scale_x_continuous("theoretical quatiles")
+C = ggplot(data = filter(sf, sf$gender == 1, sf$agegroup == 3), aes(sample = PCA)) + stat_qq() + coord_flip()  + theme_bw() + stat_qq_line() +
+  scale_y_continuous("sample quantiles male 3") + 
+  scale_x_continuous("theoretical quatiles")
+D = ggplot(data = filter(sf, sf$gender == 1, sf$agegroup == 4), aes(sample = PCA)) + stat_qq() + coord_flip()  + theme_bw() + stat_qq_line() +
+  scale_y_continuous("sample quantiles male 4") + 
+  scale_x_continuous("theoretical quatiles")
+
+grid.arrange(A,B,C,D,E,ncol=5)
+
+
+#상단 박스 하단 QQ
+sf %>% filter(gender == 1)%>% group_by(agegroup) %>% summarise(Avg = mean(GPCM)) -> meandotmale
+sf %>% filter(gender == 5)%>% group_by(agegroup) %>% summarise(Avg = mean(GPCM)) -> meandotfemale
+A = ggplot() + 
+  geom_boxplot(data = filter(sf, sf$gender == 1), mapping = aes(x = agegroup, y = GPCM, group = agegroup))+
+  geom_point(data = meandotmale, mapping = aes(x = agegroup, y = Avg)) + theme_bw()+ 
+  geom_line(data = meandotmale, mapping = aes(x = agegroup, y = Avg, group = 1))+
+  scale_y_continuous(name = "비가중 특질 점수") +
+  scale_x_discrete(labels = abbreviate, name = "연령")  + ggtitle("남성")
+B = ggplot(data = filter(sf, sf$gender == 1, sf$agegroup == 1), aes(sample = GPCM)) + stat_qq() + coord_flip()  + theme_bw() + stat_qq_line() +
+  scale_y_continuous("sample quantiles") + 
+  scale_x_continuous("theoretical quatiles")
+C = ggplot(data = filter(sf, sf$gender == 1, sf$agegroup == 2), aes(sample = GPCM)) + stat_qq() + coord_flip()  + theme_bw() + stat_qq_line() +
+  scale_y_continuous("sample quantiles") + 
+  scale_x_continuous("theoretical quatiles")
+D = ggplot(data = filter(sf, sf$gender == 1, sf$agegroup == 3), aes(sample = GPCM)) + stat_qq() + coord_flip()  + theme_bw() + stat_qq_line() +
+  scale_y_continuous("sample quantiles") + 
+  scale_x_continuous("theoretical quatiles")
+E = ggplot(data = filter(sf, sf$gender == 1, sf$agegroup == 4), aes(sample = GPCM)) + stat_qq() + coord_flip()  + theme_bw() + stat_qq_line() +
+  scale_y_continuous("sample quantiles") + 
+  scale_x_continuous("theoretical quatiles")
+FF = ggplot() + 
+  geom_boxplot(data = filter(sf, sf$gender == 5), mapping = aes(x = agegroup, y = GPCM, group = agegroup))+
+  geom_point(data = meandotmale, mapping = aes(x = agegroup, y = Avg)) + theme_bw()+ 
+  geom_line(data = meandotmale, mapping = aes(x = agegroup, y = Avg, group = 1))+
+  scale_y_continuous(name = "비가중 특질점수") +
+  scale_x_discrete(labels = abbreviate, name = "연령")  + ggtitle("여성")
+G = ggplot(data = filter(sf, sf$gender == 5, sf$agegroup == 1), aes(sample = GPCM)) + stat_qq() + coord_flip()  + theme_bw() + stat_qq_line() +
+  scale_y_continuous("sample quantiles") + 
+  scale_x_continuous("theoretical quatiles")
+H = ggplot(data = filter(sf, sf$gender == 5, sf$agegroup == 2), aes(sample = GPCM)) + stat_qq() + coord_flip()  + theme_bw() + stat_qq_line() +
+  scale_y_continuous("sample quantiles") + 
+  scale_x_continuous("theoretical quatiles")
+I = ggplot(data = filter(sf, sf$gender == 5, sf$agegroup == 3), aes(sample = GPCM)) + stat_qq() + coord_flip()  + theme_bw() + stat_qq_line() +
+  scale_y_continuous("sample quantiles") + 
+  scale_x_continuous("theoretical quatiles")
+J = ggplot(data = filter(sf, sf$gender == 5, sf$agegroup == 4), aes(sample = GPCM)) + stat_qq() + coord_flip()  + theme_bw() + stat_qq_line() +
+  scale_y_continuous("sample quantiles") + 
+  scale_x_continuous("theoretical quatiles")
+grid.arrange(A, arrangeGrob(B,C,D,E,ncol=4),FF, arrangeGrob(G,H,I,J,ncol=4), nrow = 4,heights=c(1,0.5,1,0.5))
 #alpha
 alpha = alpha(response[,1:19])
 alpha$item.stats %>% round(2) %>% write.csv("C:/git/journeytoamastersdegree/alpha.csv")
@@ -94,7 +151,7 @@ plot(jit)
 #우도비 검정
 anova(results.gpcm,results.pcm)
 
-#변별도 산점도
+#변별도 산점도 (PCA-GPCM)
 coef.gpcm <- coef(results.gpcm, IRTpars=TRUE, simplify=TRUE)
 lb = 1:19
 scattdisc = cbind(coef.gpcm$items[,1],results.pca$Structure,lb); colnames(scattdisc) = c("GPCM","PCA","item")
@@ -103,6 +160,23 @@ plot(scattdisc[,1:2])
 text(scattdisc, labels = scattdisc$item,cex= 1, pos=4)
 cor(scattdisc[,1:2])
 
+#변별도 산점도 (CFA-GPCM)
+ttt = summary(results.cfa)
+
+coef.gpcm <- coef(results.gpcm, IRTpars=TRUE, simplify=TRUE)
+lb = 1:19
+scattdisc = cbind(coef.gpcm$items[,1],ttt$PE$est[1:19],lb); colnames(scattdisc) = c("GPCM","CFA","item")
+scattdisc <- as.data.frame(scattdisc)
+plot(scattdisc[,1:2])
+text(scattdisc, labels = scattdisc$item,cex= 1, pos=4)
+cor(scattdisc[,1:2])
+
+# 각 변별도간 상관비교
+coef.gpcm <- coef(results.gpcm, IRTpars=TRUE, simplify=TRUE)
+lb = 1:19
+scattdisc = cbind(coef.gpcm$items[,1],summary(results.gpcm)[1]$rotF[1:19],ttt$PE$est[1:19],PCAitemtot,lb); colnames(scattdisc) = c("GPCM","GPCMloading","PCA","itemtot","item")
+scattdisc <- as.data.frame(scattdisc)
+cor(scattdisc[,1:4])
 
 # 표준화
 scalesf <- sf
@@ -131,3 +205,4 @@ coef.pcm <- coef(results.pcm, IRTpars=TRUE, simplify=TRUE)
 coef.gpcm <- coef(results.gpcm, IRTpars=TRUE, simplify=TRUE)
 coef.pcm$items %>% round(2)%>% write.csv("C:/git/journeytoamastersdegree/PCMitems.csv")
 coef.gpcm$items %>% round(2)%>% write.csv("C:/git/journeytoamastersdegree/GPCMitems.csv")
+

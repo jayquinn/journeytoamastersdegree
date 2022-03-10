@@ -136,28 +136,28 @@ model.gpcm <- 'F1 = 1-19'
 results.gpcm <- mirt(data=response[,1:19], model=model.gpcm, itemtype="gpcm", SE=TRUE, verbose=FALSE)
 score.GPCM<-fscores(results.gpcm,method = 'EAP')
 #CFA 점수 산출
-#model.cfa<-'F1=~a401+a402+a403+a404+a405+a406+a407+a408+a409+a410+a411+a412+a413+a414+a415+a416+a417+a418+a419'
-#results.cfa<-cfa(model=model.cfa,data = response[,1:19])
-#score.CFA<-lavPredict(results.cfa,method = "regression")
-#summary(results.cfa, fit.measures = T)
+model.cfa<-'F1=~a401+a402+a403+a404+a405+a406+a407+a408+a409+a410+a411+a412+a413+a414+a415+a416+a417+a418+a419'
+results.cfa<-cfa(model=model.cfa,data = response[,1:19])
+score.CFA<-lavPredict(results.cfa,method = "regression")
+summary(results.cfa, fit.measures = T)
 #PCA 점수 산출
 #cormat = cor(response[,1:19])
-#scree(response[,1:19])
-#VSS.scree(cormat)
-results.pca = principal(response[,1:19],nfactors=1,residuals = T,scores=T,cor = "cor",method="regression")
+scree(response[,1:19])
+VSS.scree(cormat)
+results.pca = principal(response[,1:19],nfactors=1,residuals = T,scores=T,cor = "cor",method="regression",rotate = "none")
 score.PCA <-results.pca$scores
 #점수 취합
 score.frame<-cbind(score.CTT,score.PCA,score.PCM,score.GPCM,response$diag,response$age,response$gender); colnames(score.frame)<-c("CTT","PCA","PCM","GPCM","diag","age","gender")
 as.data.frame(score.frame) -> score.frame
-#제 25 백분위수에 마커
-score.frame %>% mutate(markerCTT = case_when(CTT <= quantile(score.frame$CTT,0.279) ~ '1',
-                                             CTT > quantile(score.frame$CTT,0.279) ~ '0'),
-                       markerPCA = case_when(PCA <= quantile(score.frame$PCA,0.279) ~ '1',
-                                             PCA > quantile(score.frame$PCA,0.279) ~ '0'),
-                       markerPCM = case_when(PCM <= quantile(score.frame$PCM,0.279) ~ '1',
-                                             PCM > quantile(score.frame$PCM,0.279) ~ '0'),
-                       markerGPCM = case_when(GPCM <= quantile(score.frame$GPCM,0.279) ~ '1',
-                                              GPCM > quantile(score.frame$GPCM,0.279) ~ '0')) -> sf
+#23/24기준에 마커
+score.frame %>% mutate(markerCTT = case_when(CTT <= quantile(score.frame$CTT,0.2792118519932) ~ '1',
+                                             CTT > quantile(score.frame$CTT,0.2792118519932) ~ '0'),
+                       markerPCA = case_when(PCA <= quantile(score.frame$PCA,0.2792118519932) ~ '1',
+                                             PCA > quantile(score.frame$PCA,0.2792118519932) ~ '0'),
+                       markerPCM = case_when(PCM <= quantile(score.frame$PCM,0.2792118519932) ~ '1',
+                                             PCM > quantile(score.frame$PCM,0.2792118519932) ~ '0'),
+                       markerGPCM = case_when(GPCM <= quantile(score.frame$GPCM,0.2792118519932) ~ '1',
+                                              GPCM > quantile(score.frame$GPCM,0.2792118519932) ~ '0')) -> sf
 sf %>% mutate(agegroup = case_when(age >= 91 ~ '4',
                                    age >= 81  & age < 91 ~ '3',
                                    age >= 71  & age < 81 ~ '2',
@@ -168,10 +168,13 @@ sf$diag <- as.factor(sf$diag)
 
 
 #이상만(70세)
-sf %>% filter(age >= 91) -> sf
-sf %>% filter(age >= 81  & age < 91) -> sf
-sf %>% filter(age >= 71  & age < 81) -> sf
 sf %>% filter(age < 71) -> sf
+sf %>% filter(age >= 71  & age < 81) -> sf
+sf %>% filter(age >= 81  & age < 91) -> sf
+sf %>% filter(age >= 91) -> sf
+
+
+
 #종속변수 - 파이 계수
 phi(confusionMatrix(sf$markerCTT,sf$markerPCA)[[2]],3)
 phi(confusionMatrix(sf$markerCTT,sf$markerPCM)[[2]],3)
@@ -181,7 +184,7 @@ phi(confusionMatrix(sf$markerPCA,sf$markerGPCM)[[2]],3)
 phi(confusionMatrix(sf$markerPCM,sf$markerGPCM)[[2]],3)
 #카파
 round(confusionMatrix(sf$markerCTT,sf$markerPCA)[[3]][[2]],3)
-round(confusionMatrix(sf$markerCTT,sf$markerPCM)[[3]][[2]],3)
+round(confusionMatrix(sf$markerCTT,sf$markerPCM)[[3]][[2]],3) # sf %>% filter(markerCTT == 1 & markerPCM == 0)
 round(confusionMatrix(sf$markerCTT,sf$markerGPCM)[[3]][[2]],3)
 round(confusionMatrix(sf$markerPCA,sf$markerPCM)[[3]][[2]],3)
 round(confusionMatrix(sf$markerPCA,sf$markerGPCM)[[3]][[2]],3)
