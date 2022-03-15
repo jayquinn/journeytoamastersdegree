@@ -14,3 +14,16 @@ ggplot(data = sf, aes(x = PCA),) +
   scale_y_continuous("count",sec.axis=sec_axis(
     trans = ~./(max(table(sf$PCA)) / max(density(sf$PCA)$y)),name = "density"))
 
+
+ggplot(sf,aes(x = agegroup,y = CTT, fill = gender)) + 
+  geom_boxplot() +
+  scale_fill_manual(breaks = c("1","5"),
+                    values = c("white","grey70"))+
+  stat_summary(
+    fun = mean,
+    geom = 'line',
+    aes(group = gender),
+    position = position_dodge(width = 0.75)) + 
+  stat_summary(fun=mean, geom="point", aes(group=gender), position=position_dodge(.75), 
+               color="black", size=2) + theme_classic()
+

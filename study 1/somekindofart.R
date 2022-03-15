@@ -1,19 +1,14 @@
 
-## 총점 ##
 # 히스토그램 + density curve + qq plot
-# C#T#T binwdith = 1
-# P#C#A binwidth = 0.212
-# P#C#M binwidth = 0.7
-# G#P#C#M binwidth = 0.32
 A = ggplot(data = sf, aes(x = PCA)) + 
-  theme_bw() + 
+  theme_classic() + 
   geom_histogram(aes(y = ..count..), colour = 1, fill = "white", binwidth = 0.212) + 
   stat_function(fun = function(x) dnorm(x, mean = mean(sf$PCA), sd = sd(sf$PCA)) * nrow(sf) * 0.212) +
-  scale_x_continuous("가중 합산점수",limits = c(-6.5,4)) + #n 뒤에 ,color = "black", size =  //  걍 이거 해
+  scale_x_continuous("가중 합산점수") + #n 뒤에 ,color = "black", size =  //  걍 이거 해 ,limits = c(-8.5,4)
   scale_y_continuous("빈도 수",sec.axis=sec_axis(
   trans = ~./(max(table(sf$PCA)) / max(density(sf$PCA)$y)),name = "밀도"))
 
-B = ggplot(data = sf, aes(sample = PCA)) + stat_qq()  + theme_bw() + stat_qq_line() +
+B = ggplot(data = sf, aes(sample = PCA)) + stat_qq()  + theme_classic() + stat_qq_line() +
   scale_y_continuous("sample quantiles") + 
   scale_x_continuous("theoretical quatiles")
 
@@ -21,91 +16,44 @@ plot_grid(A,B,ncol=2,rel_widths = c(2.5,1),rel_heights = 0.5)
 
 
 #boxplot + qq
-sf %>% filter(gender == 1)%>% group_by(agegroup) %>% summarise(Avg = mean(PCA)) -> meandotmale
-sf %>% filter(gender == 5)%>% group_by(agegroup) %>% summarise(Avg = mean(PCA)) -> meandotfemale
-
-A = ggplot() + 
-  geom_boxplot(data = filter(sf, sf$gender == 1), mapping = aes(x = agegroup, y = PCA, group = agegroup))+
-  geom_point(data = meandotmale, mapping = aes(x = agegroup, y = Avg)) + theme_bw()+ 
-  geom_line(data = meandotmale, mapping = aes(x = agegroup, y = Avg, group = 1))+
+A = ggplot(sf,aes(x = agegroup,y = PCA, fill = gender)) + 
+  geom_boxplot() +
+  scale_fill_manual(breaks = c("1","5"),
+                    values = c("white","grey70")) +
+  stat_summary(
+    fun = mean,
+    geom = 'line',
+    aes(group = gender),
+    position = position_dodge(width = 0.75)) + 
+  stat_summary(fun=mean, geom="point", aes(group=gender), position=position_dodge(.75), 
+               color="black", size=2) + theme_classic() + 
   scale_y_continuous(name = "가중 특질점수") +
-  scale_x_discrete(labels = abbreviate, name = "연령")  + ggtitle("남성")
-
-B = ggplot(data = filter(sf, sf$gender == 1), aes(sample = PCA)) + stat_qq() + coord_flip()  + theme_bw() + stat_qq_line() +
-  scale_y_continuous("sample quantiles") + 
-  scale_x_continuous("theoretical quatiles")
+  scale_x_discrete(labels = abbreviate, name = "연령")  #+ ggtitle("남성")
 
 
-C = ggplot() + 
-  geom_boxplot(data = filter(sf, sf$gender == 5), mapping = aes(x = agegroup, y = PCA, group = agegroup))+
-  geom_point(data = meandotfemale, mapping = aes(x = agegroup, y = Avg)) + theme_bw()+ 
-  geom_line(data = meandotfemale, mapping = aes(x = agegroup, y = Avg, group = 1))+
-  scale_y_continuous(name = "가중 특절점수") +
-  scale_x_discrete(labels = abbreviate, name = "연령")  + ggtitle("여성")
-
-D = ggplot(data = filter(sf, sf$gender == 5), aes(sample = PCA)) + stat_qq() + coord_flip()  + theme_bw() + stat_qq_line() +
+B = ggplot(data = filter(sf, sf$gender == 1, agegroup == 1), aes(sample = PCA)) + stat_qq()  + theme_bw() + stat_qq_line() +
   scale_y_continuous("sample quantiles") + 
   scale_x_continuous("theoretical quatiles")
 
-grid.arrange(arrangeGrob(A,B,widths=c(2.5,1),ncol=2) , arrangeGrob(C,D,widths=c(2.5,1),ncol=2), nrow = 2)
 
-#연령별 qq
-A = ggplot(data = filter(sf, sf$gender == 1, sf$agegroup == 1), aes(sample = PCA)) + stat_qq() + coord_flip()  + theme_bw() + stat_qq_line() +
-  scale_y_continuous("sample quantiles male 1") + 
-  scale_x_continuous("theoretical quatiles")
-B = ggplot(data = filter(sf, sf$gender == 1, sf$agegroup == 2), aes(sample = PCA)) + stat_qq() + coord_flip()  + theme_bw() + stat_qq_line() +
-  scale_y_continuous("sample quantiles male 2") + 
-  scale_x_continuous("theoretical quatiles")
-C = ggplot(data = filter(sf, sf$gender == 1, sf$agegroup == 3), aes(sample = PCA)) + stat_qq() + coord_flip()  + theme_bw() + stat_qq_line() +
-  scale_y_continuous("sample quantiles male 3") + 
-  scale_x_continuous("theoretical quatiles")
-D = ggplot(data = filter(sf, sf$gender == 1, sf$agegroup == 4), aes(sample = PCA)) + stat_qq() + coord_flip()  + theme_bw() + stat_qq_line() +
-  scale_y_continuous("sample quantiles male 4") + 
+C = ggplot(data = filter(sf, sf$gender == 1, agegroup == 2), aes(sample = PCA)) + stat_qq()  + theme_bw() + stat_qq_line() +
+  scale_y_continuous("sample quantiles") + 
   scale_x_continuous("theoretical quatiles")
 
-grid.arrange(A,B,C,D,E,ncol=5)
+D = ggplot(data = filter(sf, sf$gender == 1, agegroup == 3), aes(sample = PCA)) + stat_qq()  + theme_bw() + stat_qq_line() +
+  scale_y_continuous("sample quantiles") + 
+  scale_x_continuous("theoretical quatiles")
+
+E = ggplot(data = filter(sf, sf$gender == 1, agegroup == 4), aes(sample = PCA)) + stat_qq()  + theme_bw() + stat_qq_line() +
+  scale_y_continuous("sample quantiles") + 
+  scale_x_continuous("theoretical quatiles")
+
+grid.arrange(A, arrangeGrob(B,C,D,E,ncol=4), nrow = 2, heights = c(1,0.5))
 
 
-#상단 박스 하단 QQ
-sf %>% filter(gender == 1)%>% group_by(agegroup) %>% summarise(Avg = mean(GPCM)) -> meandotmale
-sf %>% filter(gender == 5)%>% group_by(agegroup) %>% summarise(Avg = mean(GPCM)) -> meandotfemale
-A = ggplot() + 
-  geom_boxplot(data = filter(sf, sf$gender == 1), mapping = aes(x = agegroup, y = GPCM, group = agegroup))+
-  geom_point(data = meandotmale, mapping = aes(x = agegroup, y = Avg)) + theme_bw()+ 
-  geom_line(data = meandotmale, mapping = aes(x = agegroup, y = Avg, group = 1))+
-  scale_y_continuous(name = "비가중 특질 점수") +
-  scale_x_discrete(labels = abbreviate, name = "연령")  + ggtitle("남성")
-B = ggplot(data = filter(sf, sf$gender == 1, sf$agegroup == 1), aes(sample = GPCM)) + stat_qq() + coord_flip()  + theme_bw() + stat_qq_line() +
-  scale_y_continuous("sample quantiles") + 
-  scale_x_continuous("theoretical quatiles")
-C = ggplot(data = filter(sf, sf$gender == 1, sf$agegroup == 2), aes(sample = GPCM)) + stat_qq() + coord_flip()  + theme_bw() + stat_qq_line() +
-  scale_y_continuous("sample quantiles") + 
-  scale_x_continuous("theoretical quatiles")
-D = ggplot(data = filter(sf, sf$gender == 1, sf$agegroup == 3), aes(sample = GPCM)) + stat_qq() + coord_flip()  + theme_bw() + stat_qq_line() +
-  scale_y_continuous("sample quantiles") + 
-  scale_x_continuous("theoretical quatiles")
-E = ggplot(data = filter(sf, sf$gender == 1, sf$agegroup == 4), aes(sample = GPCM)) + stat_qq() + coord_flip()  + theme_bw() + stat_qq_line() +
-  scale_y_continuous("sample quantiles") + 
-  scale_x_continuous("theoretical quatiles")
-FF = ggplot() + 
-  geom_boxplot(data = filter(sf, sf$gender == 5), mapping = aes(x = agegroup, y = GPCM, group = agegroup))+
-  geom_point(data = meandotmale, mapping = aes(x = agegroup, y = Avg)) + theme_bw()+ 
-  geom_line(data = meandotmale, mapping = aes(x = agegroup, y = Avg, group = 1))+
-  scale_y_continuous(name = "비가중 특질점수") +
-  scale_x_discrete(labels = abbreviate, name = "연령")  + ggtitle("여성")
-G = ggplot(data = filter(sf, sf$gender == 5, sf$agegroup == 1), aes(sample = GPCM)) + stat_qq() + coord_flip()  + theme_bw() + stat_qq_line() +
-  scale_y_continuous("sample quantiles") + 
-  scale_x_continuous("theoretical quatiles")
-H = ggplot(data = filter(sf, sf$gender == 5, sf$agegroup == 2), aes(sample = GPCM)) + stat_qq() + coord_flip()  + theme_bw() + stat_qq_line() +
-  scale_y_continuous("sample quantiles") + 
-  scale_x_continuous("theoretical quatiles")
-I = ggplot(data = filter(sf, sf$gender == 5, sf$agegroup == 3), aes(sample = GPCM)) + stat_qq() + coord_flip()  + theme_bw() + stat_qq_line() +
-  scale_y_continuous("sample quantiles") + 
-  scale_x_continuous("theoretical quatiles")
-J = ggplot(data = filter(sf, sf$gender == 5, sf$agegroup == 4), aes(sample = GPCM)) + stat_qq() + coord_flip()  + theme_bw() + stat_qq_line() +
-  scale_y_continuous("sample quantiles") + 
-  scale_x_continuous("theoretical quatiles")
-grid.arrange(A, arrangeGrob(B,C,D,E,ncol=4),FF, arrangeGrob(G,H,I,J,ncol=4), nrow = 4,heights=c(1,0.5,1,0.5))
+
+
+
 #alpha
 alpha = alpha(response[,1:19])
 alpha$item.stats %>% round(2) %>% write.csv("C:/git/journeytoamastersdegree/alpha.csv")
@@ -135,7 +83,7 @@ describe(weightedsum[,-20]) %>% round(2)%>% write.csv("C:/git/journeytoamastersd
 
 #PCM
 for(i in 1:19) {
-  assign(paste0("plot",i),plot(results.gpcm, type = 'trace', which.items = c(i))) 
+  assign(paste0("plot_",i),plot(results.gpcm, type = 'trace', which.items = c(i))) 
 }
 plot_20 = plot(results.pcm, type = 'score', theta_lim = c(-4,4), lwd=2)
 grid.arrange(plot_1,plot_2,plot_3,plot_4,plot_5,plot_6,plot_7,plot_8,plot_9,plot_10,plot_11,plot_12,

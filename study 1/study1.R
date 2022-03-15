@@ -165,7 +165,7 @@ sf %>% mutate(agegroup = case_when(age >= 91 ~ '4',
 
 sf <- mutate_at(sf, vars(starts_with("marker")), as.factor)
 sf$diag <- as.factor(sf$diag)
-
+sf$gender <- as.factor(sf$gender)
 
 #이상만(70세)
 sf %>% filter(age < 71) -> sf
