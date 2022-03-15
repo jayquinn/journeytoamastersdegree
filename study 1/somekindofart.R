@@ -82,14 +82,16 @@ PCAitemtot%>%round(2)%>% write.csv("C:/git/journeytoamastersdegree/PCAitemtot.cs
 describe(weightedsum[,-20]) %>% round(2)%>% write.csv("C:/git/journeytoamastersdegree/PCAdescribe.csv")
 
 #PCM
+goat = itemplot(results.gpcm,5,type = 'trace',par.settings = bwtheme)
+legend <- g_legend(goat + theme(legend.position='bottom'))
 for(i in 1:19) {
-  assign(paste0("plot_",i),plot(results.gpcm, type = 'trace', which.items = c(i))) 
+  assign(paste0("plot_",i),itemplot(results.gpcm,i, type = 'trace',par.settings=bwtheme, main = paste0("문항",i) , auto.key = none)) 
 }
-plot_20 = plot(results.pcm, type = 'score', theta_lim = c(-4,4), lwd=2)
+plot_20 = plot(results.pcm, type = 'score',main = "검사특성곡선?뭐라고적지", theta_lim = c(-4,4), lwd=2,par.settings=bwtheme)
 grid.arrange(plot_1,plot_2,plot_3,plot_4,plot_5,plot_6,plot_7,plot_8,plot_9,plot_10,plot_11,plot_12,
              plot_13,plot_14,plot_15,plot_16,plot_17,plot_18,plot_19,plot_20,ncol=4)
 
-
+get_legend
 
 #jittered
 jit = sf[,1:4]
