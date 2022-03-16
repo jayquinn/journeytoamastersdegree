@@ -76,16 +76,9 @@ for (i in 1:nrow(response)) {
 }
 weightedsum$tot = apply(weightedsum, 1, sum) # 총점
 
-#PCA 가중합 반응값(비표준화)
-weightedsum = data.frame()
-for (i in 1:nrow(response)) {
-  newone = response[i,1:19] *results.pca$Structure
-  weightedsum = rbind(weightedsum,newone)
-}
-weightedsum$tot = apply(weightedsum, 1, sum) # 총점
+#내가 계산한거랑 PCA에서 계산해준거랑 아다리 맞나 상관 보기
+cor(weightedsum$tot,score.PCA)
 
-#내가 계산한거랑 PCA에서 계산해준거랑 상관 보기
-cor(weightedsum$tot,score.PCM)
 #PCA 문항총점상관
 PCAitemtot = data.frame()
 for (i in 1:19){
@@ -98,7 +91,7 @@ describe(weightedsum[,-20]) %>% round(2)%>% write.csv("C:/git/journeytoamastersd
 
 #PCM
 for(i in 1:19) {
-  assign(paste0("plot_",i),itemplot(results.gpcm,i, type = 'trace',par.settings=bwtheme, main = paste0("문항",i) , auto.key = none)) 
+  assign(paste0("plot_",i),itemplot(results.gpcm,i, type = 'trace', main = paste0("문항",i) , auto.key = none, par.settings = bwtheme))
 }
 plot_20 = plot(results.pcm, type = 'score',main = "검사특성곡선?뭐라고적지", theta_lim = c(-6,6), lwd=1,par.settings=bwtheme)
 grid.arrange(plot_1,plot_2,plot_3,plot_4,plot_5,plot_6,plot_7,plot_8,plot_9,plot_10,plot_11,plot_12,
@@ -179,9 +172,15 @@ coef.gpcm$items %>% round(2)%>% write.csv("C:/git/journeytoamastersdegree/GPCMit
 
 #상관 그림
 pairs(sf[,1:4])
-plot(x =sf$CTT, y = sf$PCA,cex=0.5); fit<-loess.smooth(x=sf$CTT,y=sf$PCA); lines(fit$x,fit$y,lwd = 1)
-plot(x =sf$CTT, y = sf$PCM,cex=0.5); fit<-loess.smooth(x=sf$CTT,y=sf$PCM); lines(fit$x,fit$y,lwd = 1)
-plot(x =sf$CTT, y = sf$GPCM,cex=0.5); fit<-loess.smooth(x=sf$CTT,y=sf$GPCM); lines(fit$x,fit$y,lwd = 1)
-plot(x =sf$PCA, y = sf$PCM,cex=0.5); fit<-loess.smooth(x=sf$PCA,y=sf$PCM); lines(fit$x,fit$y,lwd = 1)
-plot(x =sf$PCA, y = sf$GPCM,cex=0.5); fit<-loess.smooth(x=sf$PCA,y=sf$GPCM); lines(fit$x,fit$y,lwd = 1)
-plot(x =sf$PCM, y = sf$GPCM,cex=0.5); fit<-loess.smooth(x=sf$PCM,y=sf$GPCM); lines(fit$x,fit$y,lwd = 1)
+plot(x =sf$CTT,xlab = "비가중 합산점수", y = sf$PCA,ylab = "가중 합산점수",cex=0.5); fit<-loess.smooth(x=sf$CTT,y=sf$PCA); lines(fit$x,fit$y,lwd = 1);abline(v = quantile(sf$CTT,0.2792118519932)); abline(h = quantile(sf$PCA,0.2792118519932))
+
+plot(x =sf$CTT,xlab = "비가중 합산점수", y = sf$PCM,ylab = "비가중 특질점수",cex=0.5); fit<-loess.smooth(x=sf$CTT,y=sf$PCM); lines(fit$x,fit$y,lwd = 1);abline(v = quantile(sf$CTT,0.2792118519932)); abline(h = quantile(sf$PCM,0.2792118519932))
+
+plot(x =sf$CTT,xlab = "비가중 합산점수", y = sf$GPCM,ylab = "가중 특질점수",cex=0.5); fit<-loess.smooth(x=sf$CTT,y=sf$GPCM); lines(fit$x,fit$y,lwd = 1);abline(v = quantile(sf$CTT,0.2792118519932)); abline(h = quantile(sf$GPCM,0.2792118519932))
+
+plot(x =sf$PCA,xlab = "가중 합산점수", y = sf$PCM,ylab = "비가중 특질점수",cex=0.5); fit<-loess.smooth(x=sf$PCA,y=sf$PCM); lines(fit$x,fit$y,lwd = 1);abline(v = quantile(sf$PCA,0.2792118519932)); abline(h = quantile(sf$PCA,0.2792118519932))
+
+plot(x =sf$PCA,xlab = "가중 합산점수", y = sf$GPCM,ylab = "가중 특질점수",cex=0.5); fit<-loess.smooth(x=sf$PCA,y=sf$GPCM); lines(fit$x,fit$y,lwd = 1);abline(v = quantile(sf$PCA,0.2792118519932)); abline(h = quantile(sf$GPCM,0.2792118519932))
+
+plot(x =sf$PCM,xlab = "비가중 특질점수",y = sf$GPCM,ylab = "가중 특질점수",cex=0.5); fit<-loess.smooth(x=sf$PCM,y=sf$GPCM); lines(fit$x,fit$y,lwd = 1);abline(v = quantile(sf$PCM,0.2792118519932)); abline(h = quantile(sf$GPCM,0.2792118519932))
+

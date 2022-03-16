@@ -107,3 +107,19 @@ for(i in 1:19) {
 plot_20 = plot(results.pcm, type = 'score', theta_lim = c(-4,4), lwd=2)
 grid.arrange(plot_1,plot_2,plot_3,plot_4,plot_5,plot_6,plot_7,plot_8,plot_9,plot_10,plot_11,plot_12,
              plot_13,plot_14,plot_15,plot_16,plot_17,plot_18,plot_19,plot_20,ncol=4)
+
+#수동 주성분 점수 내기
+cormat = cor(response[1:19])
+e = eigen(cormat)
+sponse = scale(response[1:19])
+dap = sponse %*% e$vectors
+colnames(dap) <- paste0('pc', 1:19)
+head(dap)
+
+#PCA 가중합 반응값(비표준화)
+weightedsum = data.frame()
+for (i in 1:nrow(response)) {
+  newone = response[i,1:19] *results.pca$Structure
+  weightedsum = rbind(weightedsum,newone)
+}
+weightedsum$tot = apply(weightedsum, 1, sum) # 총점
