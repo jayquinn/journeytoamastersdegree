@@ -64,13 +64,28 @@ describe(response) %>% round(2)%>% write.csv("C:/git/journeytoamastersdegree/des
 results.pca$Structure %>% round(3)%>% write.csv("C:/git/journeytoamastersdegree/PCAloading.csv")
 #PCA 가중치
 results.pca$weights%>% write.csv("C:/git/journeytoamastersdegree/PCAweight.csv")
-#PCA 가중합 반응값
+#PCA 가중합 반응값(표준화)
 weightedsum = data.frame()
+sponse = apply(response[1:19],2,scale)
+sponse = scale(response[1:19])
+colMeans(sponse)
+apply(sponse, 2, sd)
 for (i in 1:nrow(response)) {
-  newone = response[i,1:19] *results.pca$weights
+  newone = t(sponse[i,1:19] *results.pca$weights)
   weightedsum = rbind(weightedsum,newone)
 }
 weightedsum$tot = apply(weightedsum, 1, sum) # 총점
+
+#PCA 가중합 반응값(비표준화)
+weightedsum = data.frame()
+for (i in 1:nrow(response)) {
+  newone = response[i,1:19] *results.pca$Structure
+  weightedsum = rbind(weightedsum,newone)
+}
+weightedsum$tot = apply(weightedsum, 1, sum) # 총점
+
+#내가 계산한거랑 PCA에서 계산해준거랑 상관 보기
+cor(weightedsum$tot,score.PCM)
 #PCA 문항총점상관
 PCAitemtot = data.frame()
 for (i in 1:19){

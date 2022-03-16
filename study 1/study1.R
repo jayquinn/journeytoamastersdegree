@@ -126,11 +126,18 @@ detach(dat)
 score.CTT<-vector("double",nrow(response))
 for ( i in 1:nrow(response) ){
   score.CTT[[i]]<-sum(response[i,1:19],na.rm=T)}
-#PCM 점수 산출
-model.pcm <- 'F1 = 1-19' 
-results.pcm <- mirt(data=response[,1:19], model=model.pcm, itemtype="Rasch", SE=TRUE, verbose=FALSE)
+#PCM mirt점수 산출 -> 변별도 2.179
+model.pcm <- 'F1 = 1-19
+              CONSTRAIN = (1-19, a1)' 
+results.pcm <- mirt(data=response[,1:19], model=model.pcm, itemtype="gpcm", SE=TRUE, verbose=FALSE)
+coef.pcm <- coef(results.pcm, IRTpars=TRUE, simplify=TRUE)
 score.PCM<-fscores(results.pcm,method = 'EAP')
-#plot(results.pcm, type = 'score', theta_lim = c(-12, 3), main = "")
+
+#PCM ltm 점수 산출 -> 변별도 2.088
+#results.pcm <- gpcm(data=response[,1:19], constraint = "1PL")
+#score.PCM <- factor.scores.gpcm(results.pcm,method = 'EAP')
+#score.PCM <- score.PCM$score.dat$z1
+
 #GPCM 점수 산출
 model.gpcm <- 'F1 = 1-19' 
 results.gpcm <- mirt(data=response[,1:19], model=model.gpcm, itemtype="gpcm", SE=TRUE, verbose=FALSE)
@@ -143,9 +150,10 @@ summary(results.cfa, fit.measures = T)
 #PCA 점수 산출
 #cormat = cor(response[,1:19])
 scree(response[,1:19])
-VSS.scree(cormat)
 results.pca = principal(response[,1:19],nfactors=1,residuals = T,scores=T,cor = "cor",method="regression",rotate = "none")
 score.PCA <-results.pca$scores
+results.pcav = principal(response[,1:19],nfactors=1,residuals = T,scores=T,cor = "cov",method="regression",rotate = "none")
+score.PCAv <-results.pca$scores
 #점수 취합
 score.frame<-cbind(score.CTT,score.PCA,score.PCM,score.GPCM,response$diag,response$age,response$gender); colnames(score.frame)<-c("CTT","PCA","PCM","GPCM","diag","age","gender")
 as.data.frame(score.frame) -> score.frame
