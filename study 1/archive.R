@@ -123,3 +123,41 @@ for (i in 1:nrow(response)) {
   weightedsum = rbind(weightedsum,newone)
 }
 weightedsum$tot = apply(weightedsum, 1, sum) # 총점
+
+
+#각각그림
+plot(x =sf$CTT,xlab = "비가중 합산점수", y = sf$PCA,ylab = "가중 합산점수",cex=0.5); fit<-loess.smooth(x=sf$CTT,y=sf$PCA); lines(fit$x,fit$y,lwd = 1);abline(v = quantile(sf$CTT,cutoff)); abline(h = quantile(sf$PCA,cutoff))
+plot(x =sf$CTT,xlab = "비가중 합산점수", y = sf$PCM,ylab = "비가중 특질점수",cex=0.5); fit<-loess.smooth(x=sf$CTT,y=sf$PCM); lines(fit$x,fit$y,lwd = 1);abline(v = quantile(sf$CTT,cutoff)); abline(h = quantile(sf$PCM,cutoff))
+plot(x =sf$CTT,xlab = "비가중 합산점수", y = sf$GPCM,ylab = "가중 특질점수",cex=0.5); fit<-loess.smooth(x=sf$CTT,y=sf$GPCM); lines(fit$x,fit$y,lwd = 1);abline(v = quantile(sf$CTT,cutoff)); abline(h = quantile(sf$GPCM,cutoff))
+plot(x =sf$PCA,xlab = "가중 합산점수", y = sf$PCM,ylab = "비가중 특질점수",cex=0.5); fit<-loess.smooth(x=sf$PCA,y=sf$PCM); lines(fit$x,fit$y,lwd = 1);abline(v = quantile(sf$PCA,cutoff)); abline(h = quantile(sf$PCA,cutoff))
+plot(x =sf$PCA,xlab = "가중 합산점수", y = sf$GPCM,ylab = "가중 특질점수",cex=0.5); fit<-loess.smooth(x=sf$PCA,y=sf$GPCM); lines(fit$x,fit$y,lwd = 1);abline(v = quantile(sf$PCA,cutoff)); abline(h = quantile(sf$GPCM,cutoff))
+plot(x =sf$PCM,xlab = "비가중 특질점수",y = sf$GPCM,ylab = "가중 특질점수",cex=0.5); fit<-loess.smooth(x=sf$PCM,y=sf$GPCM); lines(fit$x,fit$y,lwd = 1);abline(v = quantile(sf$PCM,cutoff)); abline(h = quantile(sf$GPCM,cutoff))
+#jittered
+jit = sf[,1:4]
+jit$SUM <- jitter(jit$SUM, factor = 1)
+jit$PCM <- jitter(jit$PCM, factor = 1)
+plot(jit)
+#변별도 산점도 (CFA-GPCM)
+ttt = summary(results.cfa)
+
+coef.gpcm <- coef(results.gpcm, IRTpars=TRUE, simplify=TRUE)
+lb = 1:19
+scattdisc = cbind(coef.gpcm$items[,1],ttt$PE$est[1:19],lb); colnames(scattdisc) = c("GPCM","CFA","item")
+scattdisc <- as.data.frame(scattdisc)
+plot(scattdisc[,1:2])
+text(scattdisc, labels = scattdisc$item,cex= 1, pos=4)
+cor(scattdisc[,1:2])
+
+# 문항특성곡선
+plot(results.pcm, type = 'trace', which.items = c(1:19),par.settings=bwtheme)
+plot(results.pcm, type = 'score', theta_lim = c(-4,4), lwd=2,par.settings=bwtheme)
+plot(results.gpcm, type = 'trace', which.items = c(1:19),par.settings=bwtheme)
+plot(results.gpcm, type = 'score', theta_lim = c(-4,4), lwd=2,par.settings=bwtheme)
+
+#PCA 공분산 스크리도표
+scponse <- scale(response[,1:19], center=TRUE, scale=FALSE)
+ev <- eigen(cov(scponse))
+PC = c(1:19)
+Eigen_Values <-ev$values
+Scree <- data.frame(PC, Eigen_Values)
+plot(Scree, main = "스크리 도표",ylim=c(0,8), xlab = "성분 수", ylab = "성분의 고윳값",pch = 16); lines(Scree);abline(h=1)

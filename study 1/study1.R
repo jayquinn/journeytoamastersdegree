@@ -122,10 +122,10 @@ response$gender = dat$gender # 1 = 남자, 5 = 여자
 #검사 응답이 모두 NA인 행제거
 response<- response %>% filter(!is.na(a401) & !is.na(a402) &!is.na(a403)&!is.na(a404)&!is.na(a405)&!is.na(a406)&!is.na(a407)&!is.na(a408)&!is.na(a409)&!is.na(a410)&!is.na(a411)&!is.na(a412)&!is.na(a413)&!is.na(a414)&!is.na(a415)&!is.na(a416)&!is.na(a417)&!is.na(a418)&!is.na(a419))
 detach(dat)
-#CTT 점수 산출
-score.CTT<-vector("double",nrow(response))
+#SUM 점수 산출
+score.SUM<-vector("double",nrow(response))
 for ( i in 1:nrow(response) ){
-  score.CTT[[i]]<-sum(response[i,1:19],na.rm=T)}
+  score.SUM[[i]]<-sum(response[i,1:19],na.rm=T)}
 #PCM mirt점수 산출 -> 변별도 2.179
 model.pcm <- 'F1 = 1-19
               CONSTRAIN = (1-19, a1)' 
@@ -148,24 +148,23 @@ results.cfa<-cfa(model=model.cfa,data = response[,1:19])
 score.CFA<-lavPredict(results.cfa,method = "regression")
 summary(results.cfa, fit.measures = T)
 #PCA 점수 산출
-#cormat = cor(response[,1:19])
-scree(response[,1:19])
 results.pca = principal(response[,1:19],nfactors=1,residuals = T,scores=T,cor = "cor",method="regression",rotate = "none")
 score.PCA <-results.pca$scores
 results.pcav = principal(response[,1:19],nfactors=1,residuals = T,scores=T,cor = "cov",method="regression",rotate = "none")
 score.PCAv <-results.pca$scores
+
 #점수 취합
-score.frame<-cbind(score.CTT,score.PCA,score.PCM,score.GPCM,response$diag,response$age,response$gender); colnames(score.frame)<-c("CTT","PCA","PCM","GPCM","diag","age","gender")
+score.frame<-cbind(score.SUM,score.PCA,score.PCM,score.GPCM,response$diag,response$age,response$gender); colnames(score.frame)<-c("SUM","PCA","PCM","GPCM","diag","age","gender")
 as.data.frame(score.frame) -> score.frame
 #23/24기준에 마커
-score.frame %>% mutate(markerCTT = case_when(CTT <= quantile(score.frame$CTT,0.2792118519932) ~ '1',
-                                             CTT > quantile(score.frame$CTT,0.2792118519932) ~ '0'),
-                       markerPCA = case_when(PCA <= quantile(score.frame$PCA,0.2792118519932) ~ '1',
-                                             PCA > quantile(score.frame$PCA,0.2792118519932) ~ '0'),
-                       markerPCM = case_when(PCM <= quantile(score.frame$PCM,0.2792118519932) ~ '1',
-                                             PCM > quantile(score.frame$PCM,0.2792118519932) ~ '0'),
-                       markerGPCM = case_when(GPCM <= quantile(score.frame$GPCM,0.2792118519932) ~ '1',
-                                              GPCM > quantile(score.frame$GPCM,0.2792118519932) ~ '0')) -> sf
+score.frame %>% mutate(markerSUM = case_when(SUM <= quantile(score.frame$SUM,cutoff) ~ '1',
+                                             SUM > quantile(score.frame$SUM,cutoff) ~ '0'),
+                       markerPCA = case_when(PCA <= quantile(score.frame$PCA,cutoff) ~ '1',
+                                             PCA > quantile(score.frame$PCA,cutoff) ~ '0'),
+                       markerPCM = case_when(PCM <= quantile(score.frame$PCM,cutoff) ~ '1',
+                                             PCM > quantile(score.frame$PCM,cutoff) ~ '0'),
+                       markerGPCM = case_when(GPCM <= quantile(score.frame$GPCM,cutoff) ~ '1',
+                                              GPCM > quantile(score.frame$GPCM,cutoff) ~ '0')) -> sf
 sf %>% mutate(agegroup = case_when(age >= 91 ~ '4',
                                    age >= 81  & age < 91 ~ '3',
                                    age >= 71  & age < 81 ~ '2',
@@ -174,6 +173,7 @@ sf %>% mutate(agegroup = case_when(age >= 91 ~ '4',
 sf <- mutate_at(sf, vars(starts_with("marker")), as.factor)
 sf$diag <- as.factor(sf$diag)
 sf$gender <- as.factor(sf$gender)
+
 
 #이상만(70세)
 sf %>% filter(age < 71) -> sf
@@ -184,56 +184,56 @@ sf %>% filter(age >= 91) -> sf
 
 
 #종속변수 - 파이 계수
-phi(confusionMatrix(sf$markerCTT,sf$markerPCA)[[2]],3)
-phi(confusionMatrix(sf$markerCTT,sf$markerPCM)[[2]],3)
-phi(confusionMatrix(sf$markerCTT,sf$markerGPCM)[[2]],3)
+phi(confusionMatrix(sf$markerSUM,sf$markerPCA)[[2]],3)
+phi(confusionMatrix(sf$markerSUM,sf$markerPCM)[[2]],3)
+phi(confusionMatrix(sf$markerSUM,sf$markerGPCM)[[2]],3)
 phi(confusionMatrix(sf$markerPCA,sf$markerPCM)[[2]],3)
 phi(confusionMatrix(sf$markerPCA,sf$markerGPCM)[[2]],3)
 phi(confusionMatrix(sf$markerPCM,sf$markerGPCM)[[2]],3)
 #카파
-round(confusionMatrix(sf$markerCTT,sf$markerPCA)[[3]][[2]],3)
-round(confusionMatrix(sf$markerCTT,sf$markerPCM)[[3]][[2]],3) # sf %>% filter(markerCTT == 1 & markerPCM == 0)
-round(confusionMatrix(sf$markerCTT,sf$markerGPCM)[[3]][[2]],3)
+round(confusionMatrix(sf$markerSUM,sf$markerPCA)[[3]][[2]],3)
+round(confusionMatrix(sf$markerSUM,sf$markerPCM)[[3]][[2]],3) # sf %>% filter(markerSUM == 1 & markerPCM == 0)
+round(confusionMatrix(sf$markerSUM,sf$markerGPCM)[[3]][[2]],3)
 round(confusionMatrix(sf$markerPCA,sf$markerPCM)[[3]][[2]],3)
 round(confusionMatrix(sf$markerPCA,sf$markerGPCM)[[3]][[2]],3)
 round(confusionMatrix(sf$markerPCM,sf$markerGPCM)[[3]][[2]],3)
 #f1 score
-confusionMatrix(sf$markerCTT ,sf$diag, mode = "everything", positive="1")
+confusionMatrix(sf$markerSUM ,sf$diag, mode = "everything", positive="1")
 confusionMatrix(sf$markerPCA ,sf$diag, mode = "everything", positive="1")
 confusionMatrix(sf$markerPCM ,sf$diag, mode = "everything", positive="1")
 confusionMatrix(sf$markerGPCM ,sf$diag, mode = "everything", positive="1")
 #종속변수 - 피어슨 상관계수
-round(cor(sf$CTT,sf$PCA),3)
-round(cor(sf$CTT,sf$PCM),3)
-round(cor(sf$CTT,sf$GPCM),3)
+round(cor(sf$SUM,sf$PCA),3)
+round(cor(sf$SUM,sf$PCM),3)
+round(cor(sf$SUM,sf$GPCM),3)
 round(cor(sf$PCA,sf$PCM),3)
 round(cor(sf$PCA,sf$GPCM),3)
 round(cor(sf$PCM,sf$GPCM),3)
 #종속변수 - 스피어만 상관계수
-round(cor(sf$CTT,sf$PCA,method="spearman"),3)
-round(cor(sf$CTT,sf$PCM,method="spearman"),3)
-round(cor(sf$CTT,sf$GPCM,method="spearman"),3)
+round(cor(sf$SUM,sf$PCA,method="spearman"),3)
+round(cor(sf$SUM,sf$PCM,method="spearman"),3)
+round(cor(sf$SUM,sf$GPCM,method="spearman"),3)
 round(cor(sf$PCA,sf$PCM,method="spearman"),3)
 round(cor(sf$PCA,sf$GPCM,method="spearman"),3)
 round(cor(sf$PCM,sf$GPCM,method="spearman"),3)
 # 전체 상관그림
 plot(sf[,1:4])
 # 개별 상관그림
-plot(x =sf$CTT, y = sf$PCA,cex=0.5); fit<-loess.smooth(x=sf$CTT,y=sf$PCA); lines(fit$x,fit$y,lwd = 2)
-plot(x =sf$CTT, y = sf$PCM,cex=0.5); fit<-loess.smooth(x=sf$CTT,y=sf$PCM); lines(fit$x,fit$y,lwd = 2)
-plot(x =sf$CTT, y = sf$GPCM,cex=0.5); fit<-loess.smooth(x=sf$CTT,y=sf$GPCM); lines(fit$x,fit$y,lwd = 2)
+plot(x =sf$SUM, y = sf$PCA,cex=0.5); fit<-loess.smooth(x=sf$SUM,y=sf$PCA); lines(fit$x,fit$y,lwd = 2)
+plot(x =sf$SUM, y = sf$PCM,cex=0.5); fit<-loess.smooth(x=sf$SUM,y=sf$PCM); lines(fit$x,fit$y,lwd = 2)
+plot(x =sf$SUM, y = sf$GPCM,cex=0.5); fit<-loess.smooth(x=sf$SUM,y=sf$GPCM); lines(fit$x,fit$y,lwd = 2)
 plot(x =sf$PCA, y = sf$PCM,cex=0.5); fit<-loess.smooth(x=sf$PCA,y=sf$PCM); lines(fit$x,fit$y,lwd = 2)
 plot(x =sf$PCA, y = sf$GPCM,cex=0.5); fit<-loess.smooth(x=sf$PCA,y=sf$GPCM); lines(fit$x,fit$y,lwd = 2)
 plot(x =sf$PCM, y = sf$GPCM,cex=0.5); fit<-loess.smooth(x=sf$PCM,y=sf$GPCM); lines(fit$x,fit$y,lwd = 2)
 
-png(filename="CTT-PCA.png",width=600,height=600,unit="px",bg="transparent")
-plot(x =sf$CTT, y = sf$PCA,cex=1.5,axes=F,ann=F); fit<-loess.smooth(x=sf$CTT,y=sf$PCA); lines(fit$x,fit$y,lwd = 2)
+png(filename="SUM-PCA.png",width=600,height=600,unit="px",bg="transparent")
+plot(x =sf$SUM, y = sf$PCA,cex=1.5,axes=F,ann=F); fit<-loess.smooth(x=sf$SUM,y=sf$PCA); lines(fit$x,fit$y,lwd = 2)
 dev.off()
-png(filename="CTT-PCM.png",width=600,height=600,unit="px",bg="transparent")
-plot(x =sf$CTT, y = sf$PCM,cex=1.5,axes=F,ann=F); fit<-loess.smooth(x=sf$CTT,y=sf$PCM); lines(fit$x,fit$y,lwd = 2)
+png(filename="SUM-PCM.png",width=600,height=600,unit="px",bg="transparent")
+plot(x =sf$SUM, y = sf$PCM,cex=1.5,axes=F,ann=F); fit<-loess.smooth(x=sf$SUM,y=sf$PCM); lines(fit$x,fit$y,lwd = 2)
 dev.off()
-png(filename="CTT-GPCM.png",width=600,height=600,unit="px",bg="transparent")
-plot(x =sf$CTT, y = sf$GPCM,cex=1,axes=F,ann=F); fit<-loess.smooth(x=sf$CTT,y=sf$GPCM); lines(fit$x,fit$y,lwd = 2)
+png(filename="SUM-GPCM.png",width=600,height=600,unit="px",bg="transparent")
+plot(x =sf$SUM, y = sf$GPCM,cex=1,axes=F,ann=F); fit<-loess.smooth(x=sf$SUM,y=sf$GPCM); lines(fit$x,fit$y,lwd = 2)
 dev.off()
 png(filename="PCA-PCM.png",width=600,height=600,unit="px",bg="transparent")
 plot(x =sf$PCA, y = sf$PCM,cex=1,axes=F,ann=F); fit<-loess.smooth(x=sf$PCA,y=sf$PCM); lines(fit$x,fit$y,lwd = 2)
@@ -246,7 +246,7 @@ plot(x =sf$PCM, y = sf$GPCM,cex=1,axes=F,ann=F); fit<-loess.smooth(x=sf$PCM,y=sf
 dev.off()
 
 # 종속변수 - ROC curve
-plot.roc(diag ~ CTT,print.auc=T,print.thres="best",print.thres.best.method="youden", data = sf) # subset 확인해서 잘 써먹기 ?roc에 예제 있음
+plot.roc(diag ~ SUM,print.auc=T,print.thres="best",print.thres.best.method="youden", data = sf) # subset 확인해서 잘 써먹기 ?roc에 예제 있음
 plot.roc(diag ~ PCA, data = sf,print.auc=T,print.thres="best",print.thres.best.method="youden")
 plot.roc(diag ~ PCM, data = sf,print.auc=T,print.thres="best",print.thres.best.method="youden")
 plot.roc(diag ~ GPCM, data = sf,print.auc=T,print.thres="best",print.thres.best.method="youden")
@@ -322,7 +322,7 @@ plot(roc.ndka, print.thres="best", print.thres.best.method="youden",
 
 
 
-confusionMatrix(sf$markerCTT,as.factor(sf$diag),positive = "1")
+confusionMatrix(sf$markerSUM,as.factor(sf$diag),positive = "1")
 #recall = 0.8941176
 confusionMatrix(sf$markerPCA,as.factor(sf$diag),positive = "1")
 #recall = 0.8588235
@@ -332,7 +332,7 @@ confusionMatrix(sf$markerGPCM,as.factor(sf$diag),positive = "1")
 #recall = 0.8588235
 
 
-pr = pr.curve(scores.class0=sf[sf$diag=="1",]$CTT,scores.class1 = sf[sf$diag=="0",]$CTT, curve=T)
+pr = pr.curve(scores.class0=sf[sf$diag=="1",]$SUM,scores.class1 = sf[sf$diag=="0",]$SUM, curve=T)
 plot(pr)
 y <- as.data.frame(pr$curve)
 ggplot(y, aes(y$V1, y$V2))+geom_path()+ylim(0,1)
