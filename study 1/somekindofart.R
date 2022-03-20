@@ -4,19 +4,19 @@
 # P#C#A binwidth = 0.212
 # P#C#M binwidth = 0.7
 # G#P#C#M binwidth = 0.32
-A = ggplot(data = sf, aes(x = SUM)) + 
+A = ggplot(data = sf, aes(x = GPCM)) + 
   theme_bw() + theme(
     plot.background = element_blank(),
     panel.grid.major = element_blank(),
     panel.grid.minor = element_blank()
   ) + 
-  geom_histogram(aes(y = ..count..), colour = 1, fill = "white", binwidth = 1) + 
-  stat_function(fun = function(x) dnorm(x, mean = mean(sf$SUM), sd = sd(sf$SUM)) * nrow(sf) * 1) +
-  scale_x_continuous("비가중 합산점수") + #n 뒤에 ,color = "black", size =  //  걍 이거 해 ,limits = c(-8.5,4)
+  geom_histogram(aes(y = ..count..), colour = 1, fill = "white", binwidth = 0.32) + 
+  stat_function(fun = function(x) dnorm(x, mean = mean(sf$GPCM), sd = sd(sf$GPCM)) * nrow(sf) * 0.32) +
+  scale_x_continuous("가중 합산점수") + #n 뒤에 ,color = "black", size =  //  걍 이거 해 ,limits = c(-8.5,4)
   scale_y_continuous("빈도 수",sec.axis=sec_axis(
-  trans = ~./(max(table(sf$PCA)) / max(density(sf$PCA)$y)),name = "밀도"))
+  trans = ~./(max(table(sf$GPCM)) / max(density(sf$GPCM)$y)),name = "밀도"))
 
-B = ggplot(data = sf, aes(sample = SUM)) + stat_qq()  + theme_bw() +  stat_qq_line() +
+B = ggplot(data = sf, aes(sample = GPCM)) + stat_qq()  + theme_bw() +  stat_qq_line() +
   theme(plot.background = element_blank(),
     panel.grid.major = element_blank(),
     panel.grid.minor = element_blank()) + 
@@ -27,7 +27,7 @@ plot_grid(A,B,ncol=2,rel_widths = c(2.5,1),rel_heights = 0.5)
 
 
 #boxplot + qq
-A = ggplot(sf,aes(x = agegroup,y = PCA, fill = gender)) + 
+A = ggplot(sf,aes(x = agegroup,y = GPCM, fill = gender)) + 
   geom_boxplot() +
   scale_fill_manual(breaks = c("1","5"),
                     values = c("white","grey70"),labels = c("남성", "여성")) +
@@ -45,7 +45,7 @@ A = ggplot(sf,aes(x = agegroup,y = PCA, fill = gender)) +
         panel.grid.minor = element_blank()) + guides(fill=guide_legend(title="성별")) 
 
 
-B = ggplot(data = filter(sf, sf$gender == 1, agegroup == 1), aes(sample = PCA)) + stat_qq()  + theme_bw() + stat_qq_line() +
+B = ggplot(data = filter(sf, sf$gender == 1, agegroup == 1), aes(sample = GPCM)) + stat_qq()  + theme_bw() + stat_qq_line() +
   theme(plot.background = element_blank(),
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank()) +
@@ -53,21 +53,21 @@ B = ggplot(data = filter(sf, sf$gender == 1, agegroup == 1), aes(sample = PCA)) 
   scale_x_continuous("theoretical quatiles")
 
 
-C = ggplot(data = filter(sf, sf$gender == 1, agegroup == 2), aes(sample = PCA)) + stat_qq()  + theme_bw() + stat_qq_line() +
+C = ggplot(data = filter(sf, sf$gender == 1, agegroup == 2), aes(sample = GPCM)) + stat_qq()  + theme_bw() + stat_qq_line() +
   theme(plot.background = element_blank(),
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank()) +
   scale_y_continuous("sample quantiles") + 
   scale_x_continuous("theoretical quatiles")
 
-D = ggplot(data = filter(sf, sf$gender == 1, agegroup == 3), aes(sample = PCA)) + stat_qq()  + theme_bw() + stat_qq_line() +
+D = ggplot(data = filter(sf, sf$gender == 1, agegroup == 3), aes(sample = GPCM)) + stat_qq()  + theme_bw() + stat_qq_line() +
   theme(plot.background = element_blank(),
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank()) +
   scale_y_continuous("sample quantiles") + 
   scale_x_continuous("theoretical quatiles")
 
-E = ggplot(data = filter(sf, sf$gender == 1, agegroup == 4), aes(sample = PCA)) + stat_qq()  + theme_bw() + stat_qq_line() +
+E = ggplot(data = filter(sf, sf$gender == 1, agegroup == 4), aes(sample = GPCM)) + stat_qq()  + theme_bw() + stat_qq_line() +
   theme(plot.background = element_blank(),
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank()) +
@@ -121,11 +121,11 @@ PCAitemtot%>%round(2)%>% write.csv("C:/git/journeytoamastersdegree/PCAitemtot.cs
 
 describe(weightedsum[,-20]) %>% round(2)%>% write.csv("C:/git/journeytoamastersdegree/PCAdescribe.csv")
 
-#PCM
+#ICC 그림모음
 for(i in 1:19) {
   assign(paste0("plot_",i),itemplot(results.gpcm,i, type = 'trace', main = paste0("문항",i) , auto.key = none, par.settings = bwtheme))
 }
-plot_20 = plot(results.pcm, type = 'score',main = "검사 총점 기댓값(Expected Total Score)", theta_lim = c(-6,6), lwd=1,par.settings=bwtheme)
+plot_20 = plot(results.gpcm, type = 'score',main = "검사 총점 기댓값(Expected Total Score)", theta_lim = c(-6,6), lwd=1,par.settings=bwtheme)
 grid.arrange(plot_1,plot_2,plot_3,plot_4,plot_5,plot_6,plot_7,plot_8,plot_9,plot_10,plot_11,plot_12,
              plot_13,plot_14,plot_15,plot_16,plot_17,plot_18,plot_19,plot_20,ncol=4,vp=viewport(width=1, height=0.95))
 KeyA<-list(text = list(as.character(levels(as.factor(1:5)))),
@@ -133,11 +133,18 @@ KeyA<-list(text = list(as.character(levels(as.factor(1:5)))),
            lty = 1:length(levels(as.factor(1:5))))
 draw.key(KeyA, draw = TRUE, vp = viewport(0.5, 0.02))
 
+# 문항모수
+coef.pcm <- coef(results.pcm, IRTpars=TRUE, simplify=TRUE)
+coef.pcm$items %>% round(2)%>% write.csv("C:/git/journeytoamastersdegree/PCMitems.csv")
+
 # 정보 함수
 plot(results.pcm, type = 'info', theta_lim = c(-6,6), lwd=1,par.settings=bwtheme, main = "검사 정보 함수")
 plot(results.gpcm, type = 'info', theta_lim = c(-6,6), lwd=1,par.settings=bwtheme, main = "검사 정보 함수")
 #우도비 검정
 anova(results.gpcm,results.pcm)
+# 문항모수
+coef.gpcm <- coef(results.gpcm, IRTpars=TRUE, simplify=TRUE)
+coef.gpcm$items %>% round(2)%>% write.csv("C:/git/journeytoamastersdegree/GPCMitems.csv")
 
 #변별도 산점도 (PCA-GPCM)
 coef.gpcm <- coef(results.gpcm, IRTpars=TRUE, simplify=TRUE)
@@ -165,11 +172,6 @@ ggplot(ssf, aes(x=agegroup, y=value, group=name)) + theme_bw()+
   theme(legend.position="bottom",legend.title=element_blank()) + labs(x = "연령 집단",y = "표준화된 검사 점수")
 
 
-# 문항모수
-coef.pcm <- coef(results.pcm, IRTpars=TRUE, simplify=TRUE)
-coef.gpcm <- coef(results.gpcm, IRTpars=TRUE, simplify=TRUE)
-coef.pcm$items %>% round(2)%>% write.csv("C:/git/journeytoamastersdegree/PCMitems.csv")
-coef.gpcm$items %>% round(2)%>% write.csv("C:/git/journeytoamastersdegree/GPCMitems.csv")
 
 
 #상관 그림
@@ -218,7 +220,9 @@ ggplot(data = tablep, aes(x = agegroup, y = value, group = name)) +
     panel.grid.major = element_blank(),
     panel.grid.minor = element_blank()) +
   labs(x = "연령집단",y = "피어슨 상관계수")
-  
+
+round(tablep$value,3) %>% write.csv("C:/git/journeytoamastersdegree/tablepearson.csv")
+#연령 집단별 스피어만
 sf %>% group_by(agegroup) %>% summarise("SUM-PCA" = cor(SUM,PCA,method = "spearman"),
                                         "SUM-PCM" = cor(SUM,PCM,method = "spearman"),
                                         "SUM-GPCM" = cor(SUM,GPCM,method = "spearman"),
@@ -236,7 +240,7 @@ ggplot(data = tables, aes(x = agegroup, y = value, group = name)) +
     panel.grid.minor = element_blank()
   ) +
   labs(x = "연령집단",y = "스피어만 상관계수")
-
+round(tables$value,3) %>% write.csv("C:/git/journeytoamastersdegree/tablespearman.csv")
 #연령 집단별 파이
 sf %>% group_by(agegroup) %>% summarise("SUM-PCA" = phi(confusionMatrix(markerSUM,markerPCA)[[2]],3),
                                         "SUM-PCM" = phi(confusionMatrix(markerSUM,markerPCM)[[2]],3),
@@ -255,4 +259,4 @@ ggplot(data = tableph, aes(x = agegroup, y = value, group = name)) +
     panel.grid.minor = element_blank()
   ) +
   labs(x = "연령집단",y = "파이 계수")
-
+tableph %>% write.csv("C:/git/journeytoamastersdegree/tablephi.csv")

@@ -161,3 +161,67 @@ PC = c(1:19)
 Eigen_Values <-ev$values
 Scree <- data.frame(PC, Eigen_Values)
 plot(Scree, main = "스크리 도표",ylim=c(0,8), xlab = "성분 수", ylab = "성분의 고윳값",pch = 16); lines(Scree);abline(h=1)
+
+
+
+#이상만(70세)
+sf %>% filter(age < 71) -> sf
+sf %>% filter(age >= 71  & age < 81) -> sf
+sf %>% filter(age >= 81  & age < 91) -> sf
+sf %>% filter(age >= 91) -> sf
+
+
+
+#종속변수 - 파이 계수
+phi(confusionMatrix(sf$markerSUM,sf$markerPCA)[[2]],3)
+phi(confusionMatrix(sf$markerSUM,sf$markerPCM)[[2]],3)
+phi(confusionMatrix(sf$markerSUM,sf$markerGPCM)[[2]],3)
+phi(confusionMatrix(sf$markerPCA,sf$markerPCM)[[2]],3)
+phi(confusionMatrix(sf$markerPCA,sf$markerGPCM)[[2]],3)
+phi(confusionMatrix(sf$markerPCM,sf$markerGPCM)[[2]],3)
+#카파
+round(confusionMatrix(sf$markerSUM,sf$markerPCA)[[3]][[2]],3)
+round(confusionMatrix(sf$markerSUM,sf$markerPCM)[[3]][[2]],3) # sf %>% filter(markerSUM == 1 & markerPCM == 0)
+round(confusionMatrix(sf$markerSUM,sf$markerGPCM)[[3]][[2]],3)
+round(confusionMatrix(sf$markerPCA,sf$markerPCM)[[3]][[2]],3)
+round(confusionMatrix(sf$markerPCA,sf$markerGPCM)[[3]][[2]],3)
+round(confusionMatrix(sf$markerPCM,sf$markerGPCM)[[3]][[2]],3)
+#f1 score
+confusionMatrix(sf$markerSUM ,sf$diag, mode = "everything", positive="1")
+confusionMatrix(sf$markerPCA ,sf$diag, mode = "everything", positive="1")
+confusionMatrix(sf$markerPCM ,sf$diag, mode = "everything", positive="1")
+confusionMatrix(sf$markerGPCM ,sf$diag, mode = "everything", positive="1")
+#종속변수 - 피어슨 상관계수
+round(cor(sf$SUM,sf$PCA),3)
+round(cor(sf$SUM,sf$PCM),3)
+round(cor(sf$SUM,sf$GPCM),3)
+round(cor(sf$PCA,sf$PCM),3)
+round(cor(sf$PCA,sf$GPCM),3)
+round(cor(sf$PCM,sf$GPCM),3)
+#종속변수 - 스피어만 상관계수
+round(cor(sf$SUM,sf$PCA,method="spearman"),3)
+round(cor(sf$SUM,sf$PCM,method="spearman"),3)
+round(cor(sf$SUM,sf$GPCM,method="spearman"),3)
+round(cor(sf$PCA,sf$PCM,method="spearman"),3)
+round(cor(sf$PCA,sf$GPCM,method="spearman"),3)
+round(cor(sf$PCM,sf$GPCM,method="spearman"),3)
+
+png(filename="SUM-PCA.png",width=600,height=600,unit="px",bg="transparent")
+plot(x =sf$SUM, y = sf$PCA,cex=1.5,axes=F,ann=F); fit<-loess.smooth(x=sf$SUM,y=sf$PCA); lines(fit$x,fit$y,lwd = 2)
+dev.off()
+png(filename="SUM-PCM.png",width=600,height=600,unit="px",bg="transparent")
+plot(x =sf$SUM, y = sf$PCM,cex=1.5,axes=F,ann=F); fit<-loess.smooth(x=sf$SUM,y=sf$PCM); lines(fit$x,fit$y,lwd = 2)
+dev.off()
+png(filename="SUM-GPCM.png",width=600,height=600,unit="px",bg="transparent")
+plot(x =sf$SUM, y = sf$GPCM,cex=1,axes=F,ann=F); fit<-loess.smooth(x=sf$SUM,y=sf$GPCM); lines(fit$x,fit$y,lwd = 2)
+dev.off()
+png(filename="PCA-PCM.png",width=600,height=600,unit="px",bg="transparent")
+plot(x =sf$PCA, y = sf$PCM,cex=1,axes=F,ann=F); fit<-loess.smooth(x=sf$PCA,y=sf$PCM); lines(fit$x,fit$y,lwd = 2)
+dev.off()
+png(filename="PCA-GPCM.png",width=600,height=600,unit="px",bg="transparent")
+plot(x =sf$PCA, y = sf$GPCM,cex=1,axes=F,ann=F); fit<-loess.smooth(x=sf$PCA,y=sf$GPCM); lines(fit$x,fit$y,lwd = 2)
+dev.off()
+png(filename="PCM-GPCM.png",width=600,height=600,unit="px",bg="transparent")
+plot(x =sf$PCM, y = sf$GPCM,cex=1,axes=F,ann=F); fit<-loess.smooth(x=sf$PCM,y=sf$GPCM); lines(fit$x,fit$y,lwd = 2)
+dev.off()
+
