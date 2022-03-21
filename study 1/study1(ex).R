@@ -121,6 +121,11 @@ response$age = 2018-dat$year
 response$gender = dat$gender # 1 = 남자, 5 = 여자
 #검사 응답이 모두 NA인 행제거
 response<- response %>% filter(!is.na(a401) & !is.na(a402) &!is.na(a403)&!is.na(a404)&!is.na(a405)&!is.na(a406)&!is.na(a407)&!is.na(a408)&!is.na(a409)&!is.na(a410)&!is.na(a411)&!is.na(a412)&!is.na(a413)&!is.na(a414)&!is.na(a415)&!is.na(a416)&!is.na(a417)&!is.na(a418)&!is.na(a419))
+###################################
+#####만점자 및 빵점자 제거#########
+###################################
+response[,1:19] %>% apply(1, sum) -> response$total
+response %>% filter(total !=30 & total !=0) -> response
 detach(dat)
 #SUM 점수 산출
 score.SUM<-vector("double",nrow(response))

@@ -3,6 +3,26 @@
 # S#U#M binwdith = 1
 # P#C#A binwidth = 0.212
 # P#C#M binwidth = 0.7
+A = ggplot(data = sf, aes(x = PCM)) + 
+  theme_bw() + theme(
+    plot.background = element_blank(),
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank()
+  ) + 
+  geom_histogram(aes(y = ..count..), colour = 1, fill = "white", binwidth = 0.7) + 
+  stat_function(fun = function(x) dnorm(x, mean = mean(sf$PCM), sd = sd(sf$PCM)) * nrow(sf) * 0.7) +
+  scale_x_continuous("비가중 특질점수") + #n 뒤에 ,color = "black", size =  //  걍 이거 해 ,limits = c(-8.5,4)
+  scale_y_continuous("빈도 수",sec.axis=sec_axis(
+    trans = ~./(max(table(sf$PCM)) / max(density(sf$PCM)$y)),name = "밀도"))
+
+B = ggplot(data = sf, aes(sample = PCM)) + stat_qq()  + theme_bw() +  stat_qq_line() +
+  theme(plot.background = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank()) + 
+  scale_y_continuous("sample quantiles") + 
+  scale_x_continuous("theoretical quatiles")
+
+plot_grid(A,B,ncol=2,rel_widths = c(2.5,1),rel_heights = 0.5)
 # G#P#C#M binwidth = 0.32
 A = ggplot(data = sf, aes(x = GPCM)) + 
   theme_bw() + theme(
@@ -12,7 +32,7 @@ A = ggplot(data = sf, aes(x = GPCM)) +
   ) + 
   geom_histogram(aes(y = ..count..), colour = 1, fill = "white", binwidth = 0.32) + 
   stat_function(fun = function(x) dnorm(x, mean = mean(sf$GPCM), sd = sd(sf$GPCM)) * nrow(sf) * 0.32) +
-  scale_x_continuous("가중 합산점수") + #n 뒤에 ,color = "black", size =  //  걍 이거 해 ,limits = c(-8.5,4)
+  scale_x_continuous("가중 특질점수") + #n 뒤에 ,color = "black", size =  //  걍 이거 해 ,limits = c(-8.5,4)
   scale_y_continuous("빈도 수",sec.axis=sec_axis(
   trans = ~./(max(table(sf$GPCM)) / max(density(sf$GPCM)$y)),name = "밀도"))
 
@@ -39,7 +59,7 @@ A = ggplot(sf,aes(x = agegroup,y = GPCM, fill = gender)) +
   stat_summary(fun=mean, geom="point", aes(group=gender), position=position_dodge(.75), 
                color="black", size=2) + theme_bw() + 
   scale_y_continuous(name = "가중 특질점수") +
-  scale_x_discrete(labels = abbreviate, name = "연령") +
+  scale_x_discrete(labels = c("~69", "70~79","80~89","90~"), name = "연령") +
   theme(legend.position="right",plot.background = element_blank(),
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank()) + guides(fill=guide_legend(title="성별")) 
@@ -169,7 +189,9 @@ ssf$name <- factor(ssf$name,levels = c("SUM","PCA","PCM","GPCM"))
 ggplot(ssf, aes(x=agegroup, y=value, group=name)) + theme_bw()+ 
   geom_line(aes(linetype=name))+
   geom_point(aes(shape=name))+ theme_bw() + 
-  theme(legend.position="bottom",legend.title=element_blank()) + labs(x = "연령 집단",y = "표준화된 검사 점수")
+  theme(legend.position="bottom",legend.title=element_blank()) + 
+  scale_y_continuous(name = "표준화된 검사 점수") +
+  scale_x_discrete(labels = c("~69", "70~79","80~89","90~"), name = "연령")
 
 
 
@@ -219,7 +241,8 @@ ggplot(data = tablep, aes(x = agegroup, y = value, group = name)) +
     plot.background = element_blank(),
     panel.grid.major = element_blank(),
     panel.grid.minor = element_blank()) +
-  labs(x = "연령집단",y = "피어슨 상관계수")
+  scale_y_continuous(name = "피어슨 상관계수") +
+  scale_x_discrete(labels = c("~69", "70~79","80~89","90~"), name = "연령")
 
 round(tablep$value,3) %>% write.csv("C:/git/journeytoamastersdegree/tablepearson.csv")
 #연령 집단별 스피어만
@@ -238,8 +261,8 @@ ggplot(data = tables, aes(x = agegroup, y = value, group = name)) +
     plot.background = element_blank(),
     panel.grid.major = element_blank(),
     panel.grid.minor = element_blank()
-  ) +
-  labs(x = "연령집단",y = "스피어만 상관계수")
+  ) +scale_y_continuous(name = "스피어만 상관계수") +
+  scale_x_discrete(labels = c("~69", "70~79","80~89","90~"), name = "연령")
 round(tables$value,3) %>% write.csv("C:/git/journeytoamastersdegree/tablespearman.csv")
 #연령 집단별 파이
 sf %>% group_by(agegroup) %>% summarise("SUM-PCA" = phi(confusionMatrix(markerSUM,markerPCA)[[2]],3),
@@ -257,6 +280,11 @@ ggplot(data = tableph, aes(x = agegroup, y = value, group = name)) +
     plot.background = element_blank(),
     panel.grid.major = element_blank(),
     panel.grid.minor = element_blank()
-  ) +
-  labs(x = "연령집단",y = "파이 계수")
+  ) +scale_y_continuous(name = "파이 계수") +
+  scale_x_discrete(labels = c("~69", "70~79","80~89","90~"), name = "연령")
 tableph %>% write.csv("C:/git/journeytoamastersdegree/tablephi.csv")
+
+
+
+
+########만점자와 빵점자 제외
