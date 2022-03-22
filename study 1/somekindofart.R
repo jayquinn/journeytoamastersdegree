@@ -1,7 +1,47 @@
 
 # 히스토그램 + density curve + qq plot
 # S#U#M binwdith = 1
+A = ggplot(data = sf, aes(x = SUM)) + 
+  theme_bw() + theme(
+    plot.background = element_blank(),
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank()
+  ) + 
+  geom_histogram(aes(y = ..count..), colour = 1, fill = "white", binwidth = 1) + 
+  stat_function(fun = function(x) dnorm(x, mean = mean(sf$SUM), sd = sd(sf$SUM)) * nrow(sf) * 1) +
+  scale_x_continuous("비가중 합산점수") + #n 뒤에 ,color = "black", size =  //  걍 이거 해 ,limits = c(-8.5,4)
+  scale_y_continuous("빈도 수",sec.axis=sec_axis(
+    trans = ~./(max(table(sf$SUM)) / max(density(sf$SUM)$y)),name = "밀도"))
+
+B = ggplot(data = sf, aes(sample = SUM)) + stat_qq()  + theme_bw() +  stat_qq_line() +
+  theme(plot.background = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank()) + 
+  scale_y_continuous("sample quantiles") + 
+  scale_x_continuous("theoretical quatiles")
+
+plot_grid(A,B,ncol=2,rel_widths = c(2.5,1),rel_heights = 0.5)
 # P#C#A binwidth = 0.212
+A = ggplot(data = sf, aes(x = PCA)) + 
+  theme_bw() + theme(
+    plot.background = element_blank(),
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank()
+  ) + 
+  geom_histogram(aes(y = ..count..), colour = 1, fill = "white", binwidth = 0.212) + 
+  stat_function(fun = function(x) dnorm(x, mean = mean(sf$PCA), sd = sd(sf$PCA)) * nrow(sf) * 0.212) +
+  scale_x_continuous("가중 합산점수") + #n 뒤에 ,color = "black", size =  //  걍 이거 해 ,limits = c(-8.5,4)
+  scale_y_continuous("빈도 수",sec.axis=sec_axis(
+    trans = ~./(max(table(sf$PCA)) / max(density(sf$PCA)$y)),name = "밀도"))
+
+B = ggplot(data = sf, aes(sample = PCA)) + stat_qq()  + theme_bw() +  stat_qq_line() +
+  theme(plot.background = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank()) + 
+  scale_y_continuous("sample quantiles") + 
+  scale_x_continuous("theoretical quatiles")
+
+plot_grid(A,B,ncol=2,rel_widths = c(2.5,1),rel_heights = 0.5)
 # P#C#M binwidth = 0.7
 A = ggplot(data = sf, aes(x = PCM)) + 
   theme_bw() + theme(
@@ -45,8 +85,158 @@ B = ggplot(data = sf, aes(sample = GPCM)) + stat_qq()  + theme_bw() +  stat_qq_l
 
 plot_grid(A,B,ncol=2,rel_widths = c(2.5,1),rel_heights = 0.5)
 
+#boxplot + qq SUM
+A = ggplot(sf,aes(x = agegroup,y = SUM, fill = gender)) + 
+  geom_boxplot() +
+  scale_fill_manual(breaks = c("1","5"),
+                    values = c("white","grey70"),labels = c("남성", "여성")) +
+  stat_summary(
+    fun = mean,
+    geom = 'line',
+    aes(group = gender),
+    position = position_dodge(width = 0.75)) + 
+  stat_summary(fun=mean, geom="point", aes(group=gender), position=position_dodge(.75), 
+               color="black", size=2) + theme_bw() + 
+  scale_y_continuous(name = "비가중 합산점수") +
+  scale_x_discrete(labels = c("~69", "70~79","80~89","90~"), name = "연령") +
+  theme(legend.position="right",plot.background = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank()) + guides(fill=guide_legend(title="성별")) 
 
-#boxplot + qq
+
+B = ggplot(data = filter(sf, sf$gender == 1, agegroup == 1), aes(sample = SUM)) + stat_qq()  + theme_bw() + stat_qq_line() +
+  theme(plot.background = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank()) +
+  scale_y_continuous("sample quantiles") + 
+  scale_x_continuous("theoretical quatiles")
+
+
+C = ggplot(data = filter(sf, sf$gender == 1, agegroup == 2), aes(sample = SUM)) + stat_qq()  + theme_bw() + stat_qq_line() +
+  theme(plot.background = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank()) +
+  scale_y_continuous("sample quantiles") + 
+  scale_x_continuous("theoretical quatiles")
+
+D = ggplot(data = filter(sf, sf$gender == 1, agegroup == 3), aes(sample = SUM)) + stat_qq()  + theme_bw() + stat_qq_line() +
+  theme(plot.background = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank()) +
+  scale_y_continuous("sample quantiles") + 
+  scale_x_continuous("theoretical quatiles")
+
+E = ggplot(data = filter(sf, sf$gender == 1, agegroup == 4), aes(sample = SUM)) + stat_qq()  + theme_bw() + stat_qq_line() +
+  theme(plot.background = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank()) +
+  scale_y_continuous("sample quantiles") + 
+  scale_x_continuous("theoretical quatiles")
+
+grid.arrange(A, arrangeGrob(B,C,D,E,ncol=4), nrow = 2, heights = c(1,0.5))
+
+#boxplot + qq PCA
+A = ggplot(sf,aes(x = agegroup,y = PCA, fill = gender)) + 
+  geom_boxplot() +
+  scale_fill_manual(breaks = c("1","5"),
+                    values = c("white","grey70"),labels = c("남성", "여성")) +
+  stat_summary(
+    fun = mean,
+    geom = 'line',
+    aes(group = gender),
+    position = position_dodge(width = 0.75)) + 
+  stat_summary(fun=mean, geom="point", aes(group=gender), position=position_dodge(.75), 
+               color="black", size=2) + theme_bw() + 
+  scale_y_continuous(name = "가중 합산점수") +
+  scale_x_discrete(labels = c("~69", "70~79","80~89","90~"), name = "연령") +
+  theme(legend.position="right",plot.background = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank()) + guides(fill=guide_legend(title="성별")) 
+
+
+B = ggplot(data = filter(sf, sf$gender == 1, agegroup == 1), aes(sample = PCA)) + stat_qq()  + theme_bw() + stat_qq_line() +
+  theme(plot.background = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank()) +
+  scale_y_continuous("sample quantiles") + 
+  scale_x_continuous("theoretical quatiles")
+
+
+C = ggplot(data = filter(sf, sf$gender == 1, agegroup == 2), aes(sample = PCA)) + stat_qq()  + theme_bw() + stat_qq_line() +
+  theme(plot.background = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank()) +
+  scale_y_continuous("sample quantiles") + 
+  scale_x_continuous("theoretical quatiles")
+
+D = ggplot(data = filter(sf, sf$gender == 1, agegroup == 3), aes(sample = PCA)) + stat_qq()  + theme_bw() + stat_qq_line() +
+  theme(plot.background = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank()) +
+  scale_y_continuous("sample quantiles") + 
+  scale_x_continuous("theoretical quatiles")
+
+E = ggplot(data = filter(sf, sf$gender == 1, agegroup == 4), aes(sample = PCA)) + stat_qq()  + theme_bw() + stat_qq_line() +
+  theme(plot.background = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank()) +
+  scale_y_continuous("sample quantiles") + 
+  scale_x_continuous("theoretical quatiles")
+
+grid.arrange(A, arrangeGrob(B,C,D,E,ncol=4), nrow = 2, heights = c(1,0.5))
+
+#boxplot + qq PCM
+A = ggplot(sf,aes(x = agegroup,y = PCM, fill = gender)) + 
+  geom_boxplot() +
+  scale_fill_manual(breaks = c("1","5"),
+                    values = c("white","grey70"),labels = c("남성", "여성")) +
+  stat_summary(
+    fun = mean,
+    geom = 'line',
+    aes(group = gender),
+    position = position_dodge(width = 0.75)) + 
+  stat_summary(fun=mean, geom="point", aes(group=gender), position=position_dodge(.75), 
+               color="black", size=2) + theme_bw() + 
+  scale_y_continuous(name = "비가중 특질점수") +
+  scale_x_discrete(labels = c("~69", "70~79","80~89","90~"), name = "연령") +
+  theme(legend.position="right",plot.background = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank()) + guides(fill=guide_legend(title="성별")) 
+
+
+B = ggplot(data = filter(sf, sf$gender == 1, agegroup == 1), aes(sample = PCM)) + stat_qq()  + theme_bw() + stat_qq_line() +
+  theme(plot.background = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank()) +
+  scale_y_continuous("sample quantiles") + 
+  scale_x_continuous("theoretical quatiles")
+
+
+C = ggplot(data = filter(sf, sf$gender == 1, agegroup == 2), aes(sample = PCM)) + stat_qq()  + theme_bw() + stat_qq_line() +
+  theme(plot.background = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank()) +
+  scale_y_continuous("sample quantiles") + 
+  scale_x_continuous("theoretical quatiles")
+
+D = ggplot(data = filter(sf, sf$gender == 1, agegroup == 3), aes(sample = PCM)) + stat_qq()  + theme_bw() + stat_qq_line() +
+  theme(plot.background = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank()) +
+  scale_y_continuous("sample quantiles") + 
+  scale_x_continuous("theoretical quatiles")
+
+E = ggplot(data = filter(sf, sf$gender == 1, agegroup == 4), aes(sample = PCM)) + stat_qq()  + theme_bw() + stat_qq_line() +
+  theme(plot.background = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank()) +
+  scale_y_continuous("sample quantiles") + 
+  scale_x_continuous("theoretical quatiles")
+
+grid.arrange(A, arrangeGrob(B,C,D,E,ncol=4), nrow = 2, heights = c(1,0.5))
+
+
+#boxplot + qq GPCM
 A = ggplot(sf,aes(x = agegroup,y = GPCM, fill = gender)) + 
   geom_boxplot() +
   scale_fill_manual(breaks = c("1","5"),
