@@ -477,4 +477,18 @@ tableph %>% write.csv("C:/git/journeytoamastersdegree/tablephi.csv")
 
 
 
-########만점자와 빵점자 제외
+#전체 검사 부적절성(GPCM)
+human = mean(sf$GPCM)
+coef.gpcm <- coef(results.gpcm, IRTpars=TRUE, simplify=TRUE)
+nando = mean(coef.gpcm$items[,2:4],na.rm=T)
+nando - human
+
+#연령집단별 검사 부적절성(GPCM)
+coef.gpcm <- coef(results.gpcm, IRTpars=TRUE, simplify=TRUE)
+nando = mean(coef.gpcm$items[,2:4],na.rm=T)
+sf %>% group_by(agegroup) %>% summarise(TI = nando - mean(GPCM))
+
+#연령집단별 검사 부적절성(PCM)
+coef.pcm <- coef(results.pcm, IRTpars=TRUE, simplify=TRUE)
+nando = mean(coef.pcm$items[,2:4],na.rm=T)
+sf %>% group_by(agegroup) %>% summarise(TI = nando - mean(PCM))
