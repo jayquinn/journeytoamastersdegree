@@ -1,3 +1,4 @@
+cutoff = 0.37265027783515
 dat<-read.csv("C:/git/journeytoamastersdegree/mmse.csv",header=T,sep=",")
 # C420은 도움받은여부
 # str, w는 69~~이고 lt는 61인데 str, w가 다 포함함. 아마 lt는 추가 안된 오리지날 같고... 어쨋든 데이터 동일함.
