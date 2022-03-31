@@ -363,6 +363,8 @@ scattdisc = cbind(coef.gpcm$items[,1],results.pca$Structure,lb); colnames(scattd
 scattdisc <- as.data.frame(scattdisc)
 plot(scattdisc[,1:2], xlab = "가중 특질점수", ylab = "가중 합산점수"); text(scattdisc, labels = scattdisc$item,cex= 1, pos=4) #frame = FALSE
 cor(scattdisc[,1:2])
+cor(scattdisc[-c(1,5,6,12,16),1:2])#1,5,6,12,16번 문항 제거
+cor(scattdisc[c(1,5,6,12,16),1:2])#1,5,6,12,16번 문항간 피어슨 상관계수
 
 
 # 연령별 표준화된 검사 점수
@@ -473,7 +475,25 @@ ggplot(data = tableph, aes(x = agegroup, y = value, group = name)) +
   ) +scale_y_continuous(name = "파이 계수") +
   scale_x_discrete(labels = c("~69", "70~79","80~89","90~"), name = "연령")
 tableph %>% write.csv("C:/git/journeytoamastersdegree/tablephi.csv")
-
+#연령 집단별 카파
+sf %>% group_by(agegroup) %>% summarise("SUM-PCA" = round(confusionMatrix(markerSUM,markerPCA)[[3]][[2]],3),
+                                        "SUM-PCM" = round(confusionMatrix(markerSUM,markerPCM)[[3]][[2]],3),
+                                        "SUM-GPCM" = round(confusionMatrix(markerSUM,markerGPCM)[[3]][[2]],3), 
+                                        "PCA-PCM" = round(confusionMatrix(markerPCA,markerPCM)[[3]][[2]],3),
+                                        "PCA-GPCM" = round(confusionMatrix(markerPCA,markerGPCM)[[3]][[2]],3),
+                                        "PCM-GPCM" = round(confusionMatrix(markerPCM,markerGPCM)[[3]][[2]],3)) %>% 
+  pivot_longer(cols = "SUM-PCA":"PCM-GPCM") -> tablekp
+tablekp$name = factor(tablekp$name, levels = c("SUM-PCA","SUM-PCM","SUM-GPCM","PCA-PCM","PCA-GPCM","PCM-GPCM"))
+ggplot(data = tablekp, aes(x = agegroup, y = value, group = name)) + 
+  geom_line(aes(linetype=name)) + geom_point(aes(shape=name)) + theme_bw() + 
+  theme(legend.position="bottom",legend.title=element_blank()) + 
+  theme(
+    plot.background = element_blank(),
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank()
+  ) +scale_y_continuous(name = "카파 계수") +
+  scale_x_discrete(labels = c("~69", "70~79","80~89","90~"), name = "연령")
+tablekp %>% write.csv("C:/git/journeytoamastersdegree/tablekapa.csv")
 
 
 
