@@ -388,11 +388,11 @@ ggplot(ssf, aes(x=agegroup, y=value, group=name)) + theme_bw()+
 
 
 
-#상관 그림
+#상관 그림 + 피어슨 + 스피어만 + 파이 #Smoothing Lines
 lower.panel = function(x,y){
   points(x = x, y = y, pch = 1, cex = 0.65)
-  fit<-loess.smooth(x=x,y=y)
-  lines(fit$x,fit$y,lwd = 0.75)
+  #fit<-loess.smooth(x=x,y=y)
+  #lines(fit$x,fit$y,lwd = 0.75)
   abline(v = quantile(x,cutoff))
   abline(h = quantile(y,cutoff))
 }
@@ -416,6 +416,43 @@ upper.panel = function(x,y){
 pairs(sf[,1:4],
       upper.panel = upper.panel,
       lower.panel = lower.panel)
+
+#상관 그림 + 피어슨 + #스피어만 +카파 #Smoothing Lines
+lower.panel = function(x,y){
+  points(x = x, y = y, pch = 1, cex = 0.65)
+  #fit<-loess.smooth(x=x,y=y)
+  #lines(fit$x,fit$y,lwd = 0.75)
+  abline(v = quantile(x,cutoff))
+  abline(h = quantile(y,cutoff))
+}
+upper.panel = function(x,y){
+  usr = par("usr"); on.exit(par(usr))
+  par(usr = c(0,1,0,1))
+  pearson = round(cor(x,y),3)
+  #spearman = round(cor(x,y,method="spearman"),3)
+  kappa = round(Kappa(matrix(c(nrow(sf[,1:4] %>% filter(x > quantile(x,cutoff) & y > quantile(y, cutoff))),
+              nrow(sf[,1:4] %>% filter(x > quantile(x,cutoff) & y <= quantile(y, cutoff))),
+              nrow(sf[,1:4] %>% filter(x <= quantile(x,cutoff) & y > quantile(y, cutoff))),
+              nrow(sf[,1:4] %>% filter(x <= quantile(x,cutoff) & y <= quantile(y, cutoff)))),ncol=2))[[1]][1],3)
+  txtp = paste0("Pearson = ",pearson)
+  #txts = paste0("Spearman = ",spearman)
+  txtkap = paste0("Kappa = ",kappa)
+  text(0.5,0.6,txtp,cex = 2)
+  #text(0.5,0.50,txts,cex = 2)
+  text(0.5,0.4,txtkap,cex = 2)
+}
+pairs(sf[,1:4],
+      upper.panel = upper.panel,
+      lower.panel = lower.panel)
+
+
+Kappa(matrix(c(nrow(sf[,1:4] %>% filter(SUM > quantile(SUM,cutoff) & PCA > quantile(PCA, cutoff))),
+        nrow(sf[,1:4] %>% filter(SUM > quantile(SUM,cutoff) & PCA <= quantile(PCA, cutoff))),
+        nrow(sf[,1:4] %>% filter(SUM <= quantile(SUM,cutoff) & PCA > quantile(PCA, cutoff))),
+        nrow(sf[,1:4] %>% filter(SUM <= quantile(SUM,cutoff) & PCA <= quantile(PCA, cutoff)))),ncol=2))[[1]][1]
+
+
+
 
 #연령 집단별 피어슨
 sf %>% group_by(agegroup) %>% summarise("SUM-PCA" = cor(SUM,PCA),
