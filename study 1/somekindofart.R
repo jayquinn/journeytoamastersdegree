@@ -1,4 +1,4 @@
-
+sf %>% write.csv("C:/git/journeytoamastersdegree/ssff.csv")
 # 히스토그램 + density curve + qq plot
 # S#U#M binwdith = 1
 A = ggplot(data = sf, aes(x = SUM)) + 
