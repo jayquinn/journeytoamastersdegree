@@ -348,8 +348,8 @@ coef.pcm <- coef(results.pcm, IRTpars=TRUE, simplify=TRUE)
 coef.pcm$items %>% round(2)%>% write.csv("C:/git/journeytoamastersdegree/PCMitems.csv")
 
 # 정보 함수
-plot(results.pcm, type = 'info', theta_lim = c(-6,6), lwd=1,par.settings=bwtheme, main = "검사 정보 함수")
-plot(results.gpcm, type = 'info', theta_lim = c(-6,6), lwd=1,par.settings=bwtheme, main = "검사 정보 함수")
+plot(results.pcm, type = 'info', theta_lim = c(-1.3,-1.1), lwd=1,par.settings=bwtheme, main = "검사 정보 함수")
+plot(results.gpcm, type = 'info', theta_lim = c(-1.3,-1.1), lwd=1,par.settings=bwtheme, main = "검사 정보 함수")
 #우도비 검정
 anova(results.gpcm,results.pcm)
 # 문항모수
@@ -417,10 +417,10 @@ pairs(sf[,1:4],
       upper.panel = upper.panel,
       lower.panel = lower.panel)
 
-#상관 그림 + 피어슨 + #스피어만 +카파 #Smoothing Lines
+#상관 그림 + 피어슨 + 스피어만 +카파 #Smoothing Lines
 lower.panel = function(x,y){
   points(x = x, y = y, pch = 1, cex = 0.65)
-  #fit<-loess.smooth(x=x,y=y)
+  fit<-loess.smooth(x=x,y=y)
   #lines(fit$x,fit$y,lwd = 0.75)
   abline(v = quantile(x,cutoff))
   abline(h = quantile(y,cutoff))
