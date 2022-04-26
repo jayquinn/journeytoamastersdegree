@@ -441,8 +441,16 @@ upper.panel = function(x,y){
   #text(0.5,0.50,txts,cex = 2)
   text(0.5,0.4,txtkap,cex = 2)
 }
+#my.text.panel <- function(labels) {
+#  function(x, y, lbl,cex = 2, ...) {
+#    if (lbl %in% names(labels)) lbl <- labels[[lbl]]
+#    text(x, y, lbl, cex = 2, ...)
+#  }}
+
 pairs(sf[,1:4],
       upper.panel = upper.panel,
+      #text.panel = my.text.panel(c(SUM="비가중 합산점수", PCA="가중 합산점수",
+      #                             PCM="비가중 특질점수", GPCM="가중 특질점수")),
       lower.panel = lower.panel)
 
 
