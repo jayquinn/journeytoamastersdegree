@@ -1,4 +1,8 @@
 sf %>% write.csv("C:/git/journeytoamastersdegree/ssff.csv")
+#png(filename="SVLT-REC.png",width=1200,height=600,unit="px",bg="transparent")
+#grid.arrange(a,b,c,d,e,f, nrow=3, ncol=2)
+#dev.off()
+#
 # 히스토그램 + density curve + qq plot
 # S#U#M binwdith = 1
 A = ggplot(data = sf, aes(x = SUM)) + 
@@ -134,7 +138,7 @@ E = ggplot(data = filter(sf, sf$gender == 1, agegroup == 4), aes(sample = SUM)) 
   scale_x_continuous("theoretical quatiles")
 
 grid.arrange(A, arrangeGrob(B,C,D,E,ncol=4), nrow = 2, heights = c(1,0.5))
-
+posterA = grid.arrange(A, arrangeGrob(B,C,D,E,ncol=4), nrow = 2, heights = c(1,0.5))
 #boxplot + qq PCA
 A = ggplot(sf,aes(x = agegroup,y = PCA, fill = gender)) + 
   geom_boxplot() +
@@ -184,7 +188,7 @@ E = ggplot(data = filter(sf, sf$gender == 1, agegroup == 4), aes(sample = PCA)) 
   scale_x_continuous("theoretical quatiles")
 
 grid.arrange(A, arrangeGrob(B,C,D,E,ncol=4), nrow = 2, heights = c(1,0.5))
-
+posterB = grid.arrange(A, arrangeGrob(B,C,D,E,ncol=4), nrow = 2, heights = c(1,0.5))
 #boxplot + qq PCM
 A = ggplot(sf,aes(x = agegroup,y = PCM, fill = gender)) + 
   geom_boxplot() +
@@ -234,7 +238,7 @@ E = ggplot(data = filter(sf, sf$gender == 1, agegroup == 4), aes(sample = PCM)) 
   scale_x_continuous("theoretical quatiles")
 
 grid.arrange(A, arrangeGrob(B,C,D,E,ncol=4), nrow = 2, heights = c(1,0.5))
-
+posterC = grid.arrange(A, arrangeGrob(B,C,D,E,ncol=4), nrow = 2, heights = c(1,0.5))
 
 #boxplot + qq GPCM
 A = ggplot(sf,aes(x = agegroup,y = GPCM, fill = gender)) + 
@@ -285,7 +289,7 @@ E = ggplot(data = filter(sf, sf$gender == 1, agegroup == 4), aes(sample = GPCM))
   scale_x_continuous("theoretical quatiles")
 
 grid.arrange(A, arrangeGrob(B,C,D,E,ncol=4), nrow = 2, heights = c(1,0.5))
-
+posterD = grid.arrange(A, arrangeGrob(B,C,D,E,ncol=4), nrow = 2, heights = c(1,0.5))
 
 
 
@@ -441,18 +445,13 @@ upper.panel = function(x,y){
   #text(0.5,0.50,txts,cex = 2)
   text(0.5,0.4,txtkap,cex = 2)
 }
-#my.text.panel <- function(labels) {
-#  function(x, y, lbl,cex = 2, ...) {
-#    if (lbl %in% names(labels)) lbl <- labels[[lbl]]
-#    text(x, y, lbl, cex = 2, ...)
-#  }}
 
 pairs(sf[,1:4],
       upper.panel = upper.panel,
       #text.panel = my.text.panel(c(SUM="비가중 합산점수", PCA="가중 합산점수",
       #                             PCM="비가중 특질점수", GPCM="가중 특질점수")),
       lower.panel = lower.panel)
-
+dev.off()
 
 Kappa(matrix(c(nrow(sf[,1:4] %>% filter(SUM > quantile(SUM,cutoff) & PCA > quantile(PCA, cutoff))),
         nrow(sf[,1:4] %>% filter(SUM > quantile(SUM,cutoff) & PCA <= quantile(PCA, cutoff))),
@@ -480,7 +479,15 @@ ggplot(data = tablep, aes(x = agegroup, y = value, group = name)) +
     panel.grid.minor = element_blank()) +
   scale_y_continuous(name = "피어슨 상관계수") +
   scale_x_discrete(labels = c("~69", "70~79","80~89","90~"), name = "연령")
-
+posterE = ggplot(data = tablep, aes(x = agegroup, y = value, group = name)) + 
+  geom_line(aes(linetype=name)) + geom_point(aes(shape=name)) + theme_bw() + 
+  theme(legend.position="bottom",legend.title=element_blank()) + 
+  theme(
+    plot.background = element_blank(),
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank()) +
+  scale_y_continuous(name = "피어슨 상관계수") +
+  scale_x_discrete(labels = c("~69", "70~79","80~89","90~"), name = "연령")
 round(tablep$value,3) %>% write.csv("C:/git/journeytoamastersdegree/tablepearson.csv")
 #연령 집단별 스피어만
 sf %>% group_by(agegroup) %>% summarise("SUM-PCA" = cor(SUM,PCA,method = "spearman"),
@@ -500,6 +507,7 @@ ggplot(data = tables, aes(x = agegroup, y = value, group = name)) +
     panel.grid.minor = element_blank()
   ) +scale_y_continuous(name = "스피어만 상관계수") +
   scale_x_discrete(labels = c("~69", "70~79","80~89","90~"), name = "연령")
+
 round(tables$value,3) %>% write.csv("C:/git/journeytoamastersdegree/tablespearman.csv")
 #연령 집단별 파이
 sf %>% group_by(agegroup) %>% summarise("SUM-PCA" = phi(confusionMatrix(markerSUM,markerPCA)[[2]],3),
@@ -530,6 +538,15 @@ sf %>% group_by(agegroup) %>% summarise("SUM-PCA" = round(confusionMatrix(marker
   pivot_longer(cols = "SUM-PCA":"PCM-GPCM") -> tablekp
 tablekp$name = factor(tablekp$name, levels = c("SUM-PCA","SUM-PCM","SUM-GPCM","PCA-PCM","PCA-GPCM","PCM-GPCM"))
 ggplot(data = tablekp, aes(x = agegroup, y = value, group = name)) + 
+  geom_line(aes(linetype=name)) + geom_point(aes(shape=name)) + theme_bw() + 
+  theme(legend.position="bottom",legend.title=element_blank()) + 
+  theme(
+    plot.background = element_blank(),
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank()
+  ) +scale_y_continuous(name = "카파 계수") +
+  scale_x_discrete(labels = c("~69", "70~79","80~89","90~"), name = "연령")
+posterF = ggplot(data = tablekp, aes(x = agegroup, y = value, group = name)) + 
   geom_line(aes(linetype=name)) + geom_point(aes(shape=name)) + theme_bw() + 
   theme(legend.position="bottom",legend.title=element_blank()) + 
   theme(
@@ -574,3 +591,4 @@ for(i in 1:6){
     print(a)
   }
 }
+
