@@ -557,3 +557,20 @@ sf %>% group_by(agegroup) %>% summarise(TI = nando - mean(GPCM))
 coef.pcm <- coef(results.pcm, IRTpars=TRUE, simplify=TRUE)
 nando = mean(coef.pcm$items[,2:4],na.rm=T)
 sf %>% group_by(agegroup) %>% summarise(TI = nando - mean(PCM))
+
+#스뀨 계산
+sf %>% group_by(agegroup) %>% summarise(skewSUM = skew(SUM),
+                                        skewPCA = skew(PCA),
+                                        skewPCM = skew(PCM),
+                                        skewGPCM = skew(GPCM)) ->sk
+for(i in 1:4){
+print(round(sk[i,4] - sk[i,5],2))
+}
+
+sktable = data.frame()
+for(i in 1:6){
+  for (j in 2:5){
+    a = sk[i,j] - sk[i,j+1]
+    print(a)
+  }
+}
