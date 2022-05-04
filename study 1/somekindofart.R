@@ -638,7 +638,10 @@ p +
   theme(plot.background = element_blank(),panel.grid.major = element_blank(),panel.grid.minor = element_blank()) +
   geom_segment(aes(x = -0.66,y = 0.5,xend = -0.66,yend = 0.35),arrow = arrow(type = "open",length = unit(0.25, "cm")),size = 0.5) + 
   geom_segment(aes(x = 0.66,y = 0.5,xend = 0.66,yend = 0.35),arrow = arrow(type = "open",length = unit(0.25, "cm")),size = 0.5) + 
-  annotate(geom='text', x=-0.66, y=0.55, size=5, label = expression(~delta*"1")) + 
-  annotate(geom='text', x=0.66, y=0.55, size=5, label = expression(~delta*"2"))
+  annotate(geom='text', x=-0.66, y=0.525, size=5, label = bquote(~delta[1])) + 
+  annotate(geom='text', x=0.66, y=0.525, size=5,label = bquote(~delta[2])) + 
+  annotate(geom='text', x=-2, y=0.95, size=5,label = "0") +
+  annotate(geom='text', x=0, y=0.45, size=5,label = "1") +
+  annotate(geom='text', x=2, y=0.95, size=5,label = "2")
   
   
