@@ -600,17 +600,45 @@ for(i in 1:6){
 
 ### 선형 비선형 그림
 #p + stat_function(fun = function(x) exp(x)/(1+exp(x)), n = 100) + stat_function(fun = function(x) 0.5+(0.25*x), n = 100)
-p <- ggplot(data = data.frame(x = c(-3, 3)), aes(x))
-p + stat_function(fun = function(x) 30/(1+exp(-x)), n = 100)  + geom_hline(yintercept = c(0,30), linetype = 'dashed') + 
+p <- ggplot(data = data.frame(x = c(-3, 3)), aes(x)) 
+p + stat_function(fun = function(x) 30/(1+exp(-x)), n = 100)  + geom_hline(yintercept = c(0,30), linetype = 'solid') + 
   stat_function(fun = function(x) 15+(7.5*x), n = 100) + 
-  scale_x_continuous(breaks = seq(-3,3,by = 1)) + 
-  scale_y_continuous(breaks = seq(0,30,by = 10),limits = c(0,30)) + theme_bw()+
+  scale_x_continuous(name = "특질 수준",breaks = seq(-3,3,by = 1)) + 
+  scale_y_continuous(name = "원점수",breaks = seq(0,30,by = 10),limits = c(0,30)) + theme_bw()+
   theme(plot.background = element_blank(),panel.grid.major = element_blank(),panel.grid.minor = element_blank()) +
-  geom_segment(aes(x = -3,y = 0,xend = -2,yend = 0),arrow = arrow(end = "both",type = "closed",length = unit(0.25, "cm")),size = 0.5) + #x로지1
-  geom_segment(aes(x = -3.3,y = 1,xend = -3.3,yend = 4),arrow = arrow(end = "both",type = "closed",length = unit(0.25, "cm")),size = 0.5) + #y로지1
-  geom_segment(aes(x = 0,y = 0,xend = 1,yend = 0),arrow = arrow(end = "both",type = "closed",length = unit(0.25, "cm")),size = 0.5) + #x로지2
-  geom_segment(aes(x = -3.3,y = 15,xend = -3.3,yend = 22),arrow = arrow(end = "both",type = "closed",length = unit(0.25, "cm")),size = 0.5) + #y로지2
-  geom_segment(aes(x = -2,y = 0,xend = -1,yend = 0),arrow = arrow(end = "both",type = "open",length = unit(0.25, "cm")),size = 0.5) + #x선형1
-  geom_segment(aes(x = -3.3,y = 3,xend = -3.3,yend = 6),arrow = arrow(end = "both",type = "open",length = unit(0.25, "cm")),size = 0.5) + #y선형1
-  geom_segment(aes(x = 1,y = 0,xend = 2,yend = 0),arrow = arrow(end = "both",type = "open",length = unit(0.25, "cm")),size = 0.5) + #x선형2우
-  geom_segment(aes(x = -3.3,y = 23,xend = -3.3,yend = 30),arrow = arrow(end = "both",type = "open",length = unit(0.25, "cm")),size = 0.5) #y선형2상
+  geom_segment(aes(x = -2,y = 0,xend = -1,yend = 0),arrow = arrow(end = "both",type = "closed",length = unit(0.25, "cm")),size = 0.5) + #x로지좌
+  geom_segment(aes(x = -3.3,y = 30/(1+exp(-(-2))),xend = -3.3,yend = 30/(1+exp(-(-1)))),arrow = arrow(end = "both",type = "closed",length = unit(0.25, "cm")),size = 0.5) + #y로지하
+  geom_segment(aes(x = 0,y = 0,xend = 1,yend = 0),arrow = arrow(end = "both",type = "closed",length = unit(0.25, "cm")),size = 0.5) + #x로지우
+  geom_segment(aes(x = -3.3,y = 30/(1+exp(-(0))),xend = -3.3,yend = 30/(1+exp(-(1)))),arrow = arrow(end = "both",type = "closed",length = unit(0.25, "cm")),size = 0.5) + #y로지상
+  geom_segment(aes(x = -1,y = 0,xend = -0,yend = 0),arrow = arrow(end = "both",type = "open",length = unit(0.25, "cm")),size = 0.5) + #x선형좌
+  geom_segment(aes(x = -3.1,y = 15+(7.5*(-1)),xend = -3.1,yend = 15+(7.5*(-0))),arrow = arrow(end = "both",type = "open",length = unit(0.25, "cm")),size = 0.5) + #y선형하
+  geom_segment(aes(x = 1,y = 0,xend = 2,yend = 0),arrow = arrow(end = "both",type = "open",length = unit(0.25, "cm")),size = 0.5) + #x선형우
+  geom_segment(aes(x = -3.1,y = 15+(7.5*(1)),xend = -3.1,yend = 15+(7.5*(2))),arrow = arrow(end = "both",type = "open",length = unit(0.25, "cm")),size = 0.5) + #y선형상
+  geom_segment(aes(x = -2,y = 30/(1+exp(-(-2))),xend = -3.3,yend = 30/(1+exp(-(-2)))),linetype=2) + #로지가로
+  geom_segment(aes(x = -2,y = 0,xend = -2,yend = 30/(1+exp(-(-2)))),linetype=2) + 
+  geom_segment(aes(x = -1,y = 30/(1+exp(-(-1))),xend = -3.3,yend = 30/(1+exp(-(-1)))),linetype=2) + #로지가로
+  geom_segment(aes(x = -1,y = 0,xend = -1,yend = 30/(1+exp(-(-1)))),linetype=2) + 
+  geom_segment(aes(x = 0,y = 30/(1+exp(-(0))),xend = -3.3,yend = 30/(1+exp(-(0)))),linetype=2) + #로지가로
+  geom_segment(aes(x = 0,y = 0,xend = 0,yend = 30/(1+exp(-(0)))),linetype=2) + 
+  geom_segment(aes(x = 1,y = 30/(1+exp(-(1))),xend = -3.3,yend = 30/(1+exp(-(1)))),linetype=2) + #로지가로
+  geom_segment(aes(x = 1,y = 0,xend = 1,yend = 30/(1+exp(-(1)))),linetype=2) + 
+  geom_segment(aes(x = -1,y = 15+(7.5*(-1)),xend = -3.1,yend = 15+(7.5*(-1))),linetype=2) + #선형가로
+  geom_segment(aes(x = -1,y = 0,xend = -1,yend = 15+(7.5*(-1))),linetype=2) + 
+  geom_segment(aes(x = 0,y = 15+(7.5*(0)),xend = -3.1,yend = 15+(7.5*(0))),linetype=2) + #선형가로
+  geom_segment(aes(x = 0,y = 0,xend = 0,yend = 15+(7.5*(0))),linetype=2) +
+  geom_segment(aes(x = 1,y = 15+(7.5*(1)),xend = -3.1,yend = 15+(7.5*(1))),linetype=2) + #선형가로
+  geom_segment(aes(x = 1,y = 0,xend = 1,yend = 15+(7.5*(1))),linetype=2) +
+  geom_segment(aes(x = 2,y = 0,xend = 2,yend = 15+(7.5*(2))),linetype=2)
+
+#범주반응함수
+p <- ggplot(data = data.frame(x = c(-3, 3)), aes(x)) 
+p +
+  stat_function(fun = function(x) 1/(1+8*exp(-2*x)), n = 100) + stat_function(fun = function(x) 1/(1+8*exp(2*x)), n = 100) + stat_function(fun = dnorm, args=list(mean=0, sd=1),n = 100) + 
+  scale_x_continuous(name = "특질 수준",breaks = seq(-3,3,by = 1)) + scale_y_continuous(name = "문항반응확률",breaks = seq(0,1,by = 0.5),limits = c(0,1)) + theme_bw() + 
+  theme(plot.background = element_blank(),panel.grid.major = element_blank(),panel.grid.minor = element_blank()) +
+  geom_segment(aes(x = -0.66,y = 0.5,xend = -0.66,yend = 0.35),arrow = arrow(type = "open",length = unit(0.25, "cm")),size = 0.5) + 
+  geom_segment(aes(x = 0.66,y = 0.5,xend = 0.66,yend = 0.35),arrow = arrow(type = "open",length = unit(0.25, "cm")),size = 0.5) + 
+  annotate(geom='text', x=-0.66, y=0.55, size=5, label = expression(~delta*"1")) + 
+  annotate(geom='text', x=0.66, y=0.55, size=5, label = expression(~delta*"2"))
+  
+  
