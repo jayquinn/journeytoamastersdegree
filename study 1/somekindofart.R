@@ -1,8 +1,21 @@
 sf %>% write.csv("C:/git/journeytoamastersdegree/ssff.csv")
+
 #png(filename="SVLT-REC.png",width=1200,height=600,unit="px",bg="transparent")
 #grid.arrange(a,b,c,d,e,f, nrow=3, ncol=2)
 #dev.off()
-#
+#조건부 히스토그램
+histogram(~SUM|agegroup, data = sf)
+histogram(~PCA|agegroup, data = sf)
+histogram(~PCM|agegroup, data = sf)
+histogram(~GPCM|agegroup, data = sf)
+#조건부 절단점수 이하 인원 수
+sf  %>% group_by(agegroup) %>% count(markerSUM)
+sf  %>% group_by(agegroup) %>% count(markerPCA)
+sf  %>% group_by(agegroup) %>% count(markerPCM)
+sf  %>% group_by(agegroup) %>% count(markerGPCM)
+#조건부 상관 그림
+sf %>% filter(agegroup==4) -> cf
+pairs(cf[,1:4])
 # 히스토그램 + density curve + qq plot
 # S#U#M binwdith = 1
 A = ggplot(data = sf, aes(x = SUM)) + 
@@ -421,7 +434,9 @@ pairs(sf[,1:4],
       upper.panel = upper.panel,
       lower.panel = lower.panel)
 
-#상관 그림 + 피어슨 + 스피어만 +카파 #Smoothing Lines
+
+
+#상관 그림 + 피어슨 + #스피어만 +카파 #Smoothing Lines
 lower.panel = function(x,y){
   points(x = x, y = y, pch = 1, cex = 0.65)
   fit<-loess.smooth(x=x,y=y)
@@ -451,15 +466,6 @@ pairs(sf[,1:4],
       #text.panel = my.text.panel(c(SUM="비가중 합산점수", PCA="가중 합산점수",
       #                             PCM="비가중 특질점수", GPCM="가중 특질점수")),
       lower.panel = lower.panel)
-dev.off()
-
-Kappa(matrix(c(nrow(sf[,1:4] %>% filter(SUM > quantile(SUM,cutoff) & PCA > quantile(PCA, cutoff))),
-        nrow(sf[,1:4] %>% filter(SUM > quantile(SUM,cutoff) & PCA <= quantile(PCA, cutoff))),
-        nrow(sf[,1:4] %>% filter(SUM <= quantile(SUM,cutoff) & PCA > quantile(PCA, cutoff))),
-        nrow(sf[,1:4] %>% filter(SUM <= quantile(SUM,cutoff) & PCA <= quantile(PCA, cutoff)))),ncol=2))[[1]][1]
-
-
-
 
 #연령 집단별 피어슨
 sf %>% group_by(agegroup) %>% summarise("SUM-PCA" = cor(SUM,PCA),
@@ -592,3 +598,19 @@ for(i in 1:6){
   }
 }
 
+### 선형 비선형 그림
+#p + stat_function(fun = function(x) exp(x)/(1+exp(x)), n = 100) + stat_function(fun = function(x) 0.5+(0.25*x), n = 100)
+p <- ggplot(data = data.frame(x = c(-3, 3)), aes(x))
+p + stat_function(fun = function(x) 30/(1+exp(-x)), n = 100)  + geom_hline(yintercept = c(0,30), linetype = 'dashed') + 
+  stat_function(fun = function(x) 15+(7.5*x), n = 100) + 
+  scale_x_continuous(breaks = seq(-3,3,by = 1)) + 
+  scale_y_continuous(breaks = seq(0,30,by = 10),limits = c(0,30)) + theme_bw()+
+  theme(plot.background = element_blank(),panel.grid.major = element_blank(),panel.grid.minor = element_blank()) +
+  geom_segment(aes(x = -3,y = 0,xend = -2,yend = 0),arrow = arrow(end = "both",type = "closed",length = unit(0.25, "cm")),size = 0.5) + #x로지1
+  geom_segment(aes(x = -3.3,y = 1,xend = -3.3,yend = 4),arrow = arrow(end = "both",type = "closed",length = unit(0.25, "cm")),size = 0.5) + #y로지1
+  geom_segment(aes(x = 0,y = 0,xend = 1,yend = 0),arrow = arrow(end = "both",type = "closed",length = unit(0.25, "cm")),size = 0.5) + #x로지2
+  geom_segment(aes(x = -3.3,y = 15,xend = -3.3,yend = 22),arrow = arrow(end = "both",type = "closed",length = unit(0.25, "cm")),size = 0.5) + #y로지2
+  geom_segment(aes(x = -2,y = 0,xend = -1,yend = 0),arrow = arrow(end = "both",type = "open",length = unit(0.25, "cm")),size = 0.5) + #x선형1
+  geom_segment(aes(x = -3.3,y = 3,xend = -3.3,yend = 6),arrow = arrow(end = "both",type = "open",length = unit(0.25, "cm")),size = 0.5) + #y선형1
+  geom_segment(aes(x = 1,y = 0,xend = 2,yend = 0),arrow = arrow(end = "both",type = "open",length = unit(0.25, "cm")),size = 0.5) + #x선형2우
+  geom_segment(aes(x = -3.3,y = 23,xend = -3.3,yend = 30),arrow = arrow(end = "both",type = "open",length = unit(0.25, "cm")),size = 0.5) #y선형2상
