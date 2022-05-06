@@ -366,7 +366,9 @@ coef.pcm$items %>% round(2)%>% write.csv("C:/git/journeytoamastersdegree/PCMitem
 
 # 정보 함수
 plot(results.pcm, type = 'info', theta_lim = c(-1.3,-1.1), lwd=1,par.settings=bwtheme, main = "검사 정보 함수")
-plot(results.gpcm, type = 'info', theta_lim = c(-1.3,-1.1), lwd=1,par.settings=bwtheme, main = "검사 정보 함수")
+plot(results.gpcm, type = 'info', theta_lim = c(-1.3,-1.1), lwd=1,par.settings=bwtheme, main = "검사 정보 함수") #xyplot으로 동작함
+plot(results.pcm, type = 'info', theta_lim = c(-4,1), lwd=1,par.settings=bwtheme, main = "")
+plot(results.gpcm, type = 'info', theta_lim = c(-4,1), lwd=1,par.settings=bwtheme, main = " ")
 #우도비 검정
 anova(results.gpcm,results.pcm)
 # 문항모수
@@ -399,6 +401,7 @@ ggplot(ssf, aes(x=agegroup, y=value, group=name)) + theme_bw()+
   geom_line(aes(linetype=name))+
   geom_point(aes(shape=name))+ theme_bw() + 
   theme(legend.position="bottom",legend.title=element_blank()) + 
+  theme(plot.background = element_blank(),panel.grid.major = element_blank(),panel.grid.minor = element_blank()) +
   scale_y_continuous(name = "표준화된 검사 점수") +
   scale_x_discrete(labels = c("~69", "70~79","80~89","90~"), name = "연령")
 
