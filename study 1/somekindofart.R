@@ -37,7 +37,7 @@ B = ggplot(data = sf, aes(sample = SUM)) + stat_qq()  + theme_bw() +  stat_qq_li
   scale_y_continuous("sample quantiles") + 
   scale_x_continuous("theoretical quatiles")
 
-plot_grid(A,B,ncol=2,rel_widths = c(2.5,1),rel_heights = 0.5)
+TOPA = plot_grid(A,B,ncol=2,rel_widths = c(2.5,1),rel_heights = 0.5)
 # P#C#A binwidth = 0.212
 A = ggplot(data = sf, aes(x = PCA)) + 
   theme_bw() + theme(
@@ -58,7 +58,7 @@ B = ggplot(data = sf, aes(sample = PCA)) + stat_qq()  + theme_bw() +  stat_qq_li
   scale_y_continuous("sample quantiles") + 
   scale_x_continuous("theoretical quatiles")
 
-plot_grid(A,B,ncol=2,rel_widths = c(2.5,1),rel_heights = 0.5)
+TOPB = plot_grid(A,B,ncol=2,rel_widths = c(2.5,1),rel_heights = 0.5)
 # P#C#M binwidth = 0.7
 A = ggplot(data = sf, aes(x = PCM)) + 
   theme_bw() + theme(
@@ -79,7 +79,7 @@ B = ggplot(data = sf, aes(sample = PCM)) + stat_qq()  + theme_bw() +  stat_qq_li
   scale_y_continuous("sample quantiles") + 
   scale_x_continuous("theoretical quatiles")
 
-plot_grid(A,B,ncol=2,rel_widths = c(2.5,1),rel_heights = 0.5)
+TOPC = plot_grid(A,B,ncol=2,rel_widths = c(2.5,1),rel_heights = 0.5)
 # G#P#C#M binwidth = 0.32
 A = ggplot(data = sf, aes(x = GPCM)) + 
   theme_bw() + theme(
@@ -100,7 +100,7 @@ B = ggplot(data = sf, aes(sample = GPCM)) + stat_qq()  + theme_bw() +  stat_qq_l
   scale_y_continuous("sample quantiles") + 
   scale_x_continuous("theoretical quatiles")
 
-plot_grid(A,B,ncol=2,rel_widths = c(2.5,1),rel_heights = 0.5)
+TOPD = plot_grid(A,B,ncol=2,rel_widths = c(2.5,1),rel_heights = 0.5)
 
 #boxplot + qq SUM
 A = ggplot(sf,aes(x = agegroup,y = SUM, fill = gender)) + 
@@ -304,7 +304,8 @@ E = ggplot(data = filter(sf, sf$gender == 1, agegroup == 4), aes(sample = GPCM))
 grid.arrange(A, arrangeGrob(B,C,D,E,ncol=4), nrow = 2, heights = c(1,0.5))
 posterD = grid.arrange(A, arrangeGrob(B,C,D,E,ncol=4), nrow = 2, heights = c(1,0.5))
 
-
+#점수분포표 큰거 한 장
+grid.arrange(TOPA,TOPB,posterA,posterB,TOPC,TOPD,posterC,posterD, ncol = 2)
 
 
 #alpha
