@@ -14,8 +14,14 @@ sf  %>% group_by(agegroup) %>% count(markerPCA)
 sf  %>% group_by(agegroup) %>% count(markerPCM)
 sf  %>% group_by(agegroup) %>% count(markerGPCM)
 #조건부 상관 그림
-sf %>% filter(agegroup==4) -> cf
+sf %>% filter(agegroup==3) -> cf
 pairs(cf[,1:4])
+#연령별 점수 평균
+sf %>% group_by(agegroup) %>% summarise(sum = mean(SUM),
+                                        pca = mean(PCA),
+                                        pcm = mean(PCM),
+                                        gpcm = mean(GPCM))
+# SUM 23.999 PCA -0.177 PCM -0.493 GPCM -0.548
 # 히스토그램 + density curve + qq plot
 # S#U#M binwdith = 1
 A = ggplot(data = sf, aes(x = SUM)) + 

@@ -18,7 +18,7 @@ library(grid)
 library("lemon")
 library("lattice");bwtheme <- standard.theme("pdf", color=FALSE) #mirt그림
 library(latticeExtra) #mirt그림
-
+select = dplyr::select
 # cohen.kappa 랑 wkappa ?cohen.kappa
 # mirt simdata
 # psych https://personality-project.org/r/html/sim.html
