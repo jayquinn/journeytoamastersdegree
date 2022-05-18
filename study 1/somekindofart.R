@@ -602,6 +602,16 @@ for(i in 1:6){
   }
 }
 
+
+##검사특성곡선
+p <- ggplot(data = data.frame(x = c(-3, 3)), aes(x)) 
+p + stat_function(fun = function(x) 30/(1+exp(-x)), n = 100) + 
+  scale_x_continuous(name = "특질 수준",breaks = seq(-3,3,by = 1)) + 
+  scale_y_continuous(name = "예측된 원점수",breaks = seq(0,30,by = 5),limits = c(0,30)) + theme_bw()+
+  theme(plot.background = element_blank(),panel.grid.major = element_blank(),panel.grid.minor = element_blank())+ 
+  geom_segment(aes(x = 1.61,y = 30/(1+exp(-(1.61))),xend = -3.3,yend = 30/(1+exp(-(1.61)))),arrow = arrow(type = "closed",length = unit(0.25, "cm")),size = 0.5) + 
+  geom_segment(aes(x = 1.61,y = 0,xend = 1.61,yend = 30/(1+exp(-(1.61)))))
+
 ### 선형 비선형 그림
 #p + stat_function(fun = function(x) exp(x)/(1+exp(x)), n = 100) + stat_function(fun = function(x) 0.5+(0.25*x), n = 100)
 p <- ggplot(data = data.frame(x = c(-3, 3)), aes(x)) 
