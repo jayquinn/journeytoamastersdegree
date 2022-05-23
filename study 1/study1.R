@@ -153,7 +153,9 @@ results.pca = principal(response[,1:19],nfactors=1,residuals = T,scores=T,cor = 
 score.PCA <-results.pca$scores
 results.pcav = principal(response[,1:19],nfactors=1,residuals = T,scores=T,cor = "cov",method="regression",rotate = "none")
 score.PCAv <-results.pca$scores
-
+# solve(cor(response[,1:19]),results.pca$Structure) = 요인점수
+# solve(a,b) = > ax=b에서 x를 구하여 반환 =  a %*% x = b에서 x를 구하여 반환
+# 여기서 x는 a의 역행렬 곱하기 b임 = x = a^-1 %*% b
 #점수 취합
 score.frame<-cbind(score.SUM,score.PCA,score.PCM,score.GPCM,response$diag,response$age,response$gender); colnames(score.frame)<-c("SUM","PCA","PCM","GPCM","diag","age","gender")
 as.data.frame(score.frame) -> score.frame
